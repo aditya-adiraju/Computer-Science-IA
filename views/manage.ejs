@@ -1,0 +1,58 @@
+<link rel="stylesheet" type= "text/css" href="css/style2.css"/>
+<style>
+
+    table {
+        margin-top: 32px;
+        min-width: 600px;
+        border: thick solid black ;
+        border-spacing: 0;
+        padding: 16px;
+        border-radius: 16px;
+    }
+    table th{
+        padding: 10px;
+        border: medium solid black
+    }
+    table td{
+        padding: 10px;
+        border: thin solid black
+    }
+
+</style>
+
+
+<body>
+<form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
+<h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
+<h2 style="text-align:center;">Manage Accounts</h2>
+<h1 class="table">Manage Users</h1>
+
+<table class="table">
+  <thead>
+    <th>id</th>
+    <th>name</th>
+    <th>school</th>
+    <th>email</th>
+    <th>role</th>
+  </thead>
+  <tbody>
+    <% users.forEach(user => { %>
+    <tr>
+      <td><%= user.id %></td>
+      <td><%= user.name %></td>
+      <td><%= user.school %></td>
+      <td><%= user.email %></td>
+      <td>
+        <form action="/admin/update-role" method="post">
+          <input type="hidden" name="id" value="<%= user.id %>" />
+          <select name="role" id="role">
+            <option value="ADMIN" <%= user.role === 'ADMIN' ? 'selected' : '' %> >Admin</option>
+            <option value="CLIENT" <%= user.role === 'CLIENT' ? 'selected' : '' %>>Client</option>
+          </select>
+          <input type="submit" class="button" value="update">
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

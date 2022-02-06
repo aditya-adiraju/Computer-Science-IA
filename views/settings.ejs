@@ -1,4 +1,4 @@
-<link rel="stylesheet" type= "text/css" href="css/style2.css"/>
+<%- include('./layouts/header') %>
 <style>
     .button {
     background-color: #3898d5; /* dark Blue */
@@ -21,13 +21,6 @@
     }
 </script>
 <form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
-<div class="sidebar">
-    <img src = "img/logo.svg" alt="CISMUN logo" width="120" height="120" style="margin-left:13%"/>
-    <a href="/">Dashboard</a>
-    <a href="/resources">Resources</a>
-    <a href="/settings">Settings</a>
-    <a href="#" onclick="logout()">Logout</a>
-</div>
 
 <h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
 <h2 style="text-align:center;">Settings</h2>

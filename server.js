@@ -4,7 +4,7 @@ const Delegate = require('./delegate.js')
 const Advisor = require('./advisor.js')
 const Delegation = require('./delegation.js')
 const config = require('./config.json')
-
+const createHttpError = require('http-errors');
 
 //Including External libraries
 const express = require('express') //Build web app, handle and funnel requests
@@ -14,7 +14,7 @@ const bcrypt = require('bcrypt') //password hashing
 const passport = require('passport') //Session Authentication
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser');
-
+const { roles } = require('./constants');
 let mysql = require('mysql') //connecting to MYSQL database
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config() //Creates environment variables
@@ -52,12 +52,19 @@ connection.query(sql, (error, results, fields) => {
       school: results[i].School,
       nationality: results[i].Nationality,
       email: results[i].Email,
-      password: results[i].Password.toString()
+      password: results[i].Password.toString(),
+      role: results[i].Role
     })
   }
 });
 
-
+var simple=function(){
+  var textMultiple = {
+      text1:"text1",
+      text2:"text2"
+  };
+  return textMultiple;
+}
 //Initializing Passport settings 
 const initializePassport = require('./passport-config')
 const { name } = require('ejs')
@@ -97,7 +104,9 @@ app.get('/', checkAuthenticated, (req, res, next) => {
     nationality: req.session.passport.user.nationality,
     sex: req.session.passport.user.sex,
     school: req.session.passport.user.school,
-    email: req.session.passport.user.email})
+    email: req.session.passport.user.email,
+    role: req.session.passport.user.role})
+
 
 })
 
@@ -109,6 +118,10 @@ app.get('/resources', checkAuthenticated, (req, res) => {
 app.get('/settings', checkAuthenticated, (req, res) => {
   res.locals.user = req.session.passport.user;
   res.render('settings.ejs', { name: req.user.Name })
+})
+
+app.get('/admin', checkAuthenticated, checkAdmin,(req, res) => {
+  res.render('manage.ejs', { users })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -143,6 +156,19 @@ app.post('/', checkAuthenticated, (req,res)=> {
   res.redirect('/login')
 })
 
+app.post('/admin/update-role', checkAuthenticated, (req,res)=> {
+  var role = req.body.role
+  var id = req.body.id
+  let sql = 'UPDATE accounts SET Role ="' + role + '" WHERE (ID =' + id + ');'
+  console.log(sql)
+  connection.query(sql, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  console.log("Delegate Added to the List")
+  res.redirect('/login')
+})
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   try {
     /* adding the new registration as a record in the database*/
@@ -155,8 +181,14 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
     var school = req.body.school
     var nationality = req.body.nationality
     var email = req.body.email
-
-    let insertStatement = 'INSERT INTO accounts(ID, Salutation, Name, Sex, School, Nationality, Email, Password) VALUES(NULL,"'+ salutation +'","' + name +'","'+ sex +'","' + school +'","' + nationality +'","' + email +'","' + hashedPassword +'")'
+    console.log(email)
+    if (email == "admin@email.com"){
+      var role = roles.admin
+    }  
+    else{
+      var role = roles.client
+    }
+    let insertStatement = 'INSERT INTO accounts(ID, Salutation, Name, Sex, School, Nationality, Email, Password, Role) VALUES(NULL,"'+ salutation +'","' + name +'","'+ sex +'","' + school +'","' + nationality +'","' + email +'","' + hashedPassword +'","' + role +'")'
 
 
     connection.query(insertStatement, (error)=>{
@@ -178,7 +210,8 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
         school: school,
         nationality: nationality,
         email: email,
-        password: hashedPassword
+        password: hashedPassword,
+        role: results[0].Role
       })
     });
 
@@ -194,7 +227,17 @@ app.delete('/logout', (req, res) => {
   res.redirect('/login')
 })
 
+// 404 Handler
+app.use((req, res, next) => {
+  next(createHttpError.NotFound());
+});
 
+// Error Handler
+app.use((error, req, res, next) => {
+  error.status = error.status || 500;
+  res.status(error.status);
+  res.render('error40x.ejs', { error });
+});
 
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
@@ -209,7 +252,14 @@ function checkNotAuthenticated(req, res, next) {
   }
   next()
 }
+function checkAdmin(req, res, next) {
 
+  if (req.session.passport.user.role == roles.admin) {
+    next();
+  } else {
+    res.redirect('/');
+  }
+}
 //PORT 3000
 const PORT = process.env.PORT || 3000;
 console.log(`🚀 @  http://localhost:${PORT}`)

@@ -1,6 +1,4 @@
-
-<link rel="stylesheet" href="https://use.typekit.net/eup3huq.css">
-<link rel="stylesheet" type= "text/css" href="css/style2.css"/>
+<%- include('./layouts/header') %>
 
 <script>
   function openForm() {
@@ -31,18 +29,10 @@
 
 </script>
 
-<div class="sidebar">
-  <img src = "img/logo.svg" alt="CISMUN logo" width="120" height="120" style="margin-left:13%"/>
-  <a href="/">Dashboard</a>
-  <a href="/resources">Resources</a>
-  <a href="/settings">Settings</a>
-  <a href="#" onclick="logout()">Logout</a>
-</div>
-
 
 <h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
 <h2 style="text-align:center;">Dashboard</h2>
-<%= user %> 
+
 <div>
   <h4>PERSONAL INFORMATION</h4> 
   <b>Supervisor ID: </b><%= id %><br>
@@ -111,10 +101,6 @@
   </div>
 </div>
 
-
-<form id="LOGOUT" action="/logout?_method=DELETE" method="POST">
-  <button class="button" type="submit">Log Out</button>
-</form>
 
 <button class="button" onclick="openForm()">Add Delegate</button>
 
@@ -331,6 +317,7 @@
         <br><br><br>
         <button class="button" type="submit">ADD</button>
         <button type="button" class="button" onclick="closeForm()">CLOSE</button>
+        <br><br>
 
     </form>
   </div>
