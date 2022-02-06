@@ -1,0 +1,42 @@
+@font-face {
+  font-family: centuryGothic;
+  src: url(./views/CenturyGothic.ttf);
+}
+h1 {
+  font-family: centuryGothic;
+  color: #3798d5;
+}
+h3 {
+  font-family: centuryGothic;
+  color: #3798d5;
+}
+body {
+  font-family: centuryGothic;
+}
+.center {
+  display: flex;
+  justify-content: center;
+}
+.button {
+  background-color: #2f7fa3; /* dark Blue */
+  border: none;
+  color: white;
+  padding: 5px;
+  font-family: centuryGothic;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+.input {
+  width: 150px;
+}
+.container {
+  text-align: right;
+  align-items: left;
+  height: 75px;
+  width: 125%;
+  grid-gap: 20px 20px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+}

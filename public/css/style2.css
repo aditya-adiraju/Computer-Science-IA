@@ -1,0 +1,180 @@
+/* Initializing sidebar view */
+.sidebar {
+  height: 100%;
+  width: 20%;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #164357;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.sidebar a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #f1f1f1;
+  display: block;
+}
+
+.sidebar a:hover {
+  color: yellow;
+}
+
+/* Style page content */
+.main {
+  margin-left: 160px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
+  align-items: center;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidebar {
+    padding-top: 15px;
+  }
+  .sidebar a {
+    font-size: 18px;
+  }
+}
+@font-face {
+  font-family: centuryGothic;
+  src: url(fonts/CenturyGothic.ttf) format("ttf");
+}
+
+@font-face {
+  font-family: centuryGothicSemiBold;
+  src: url(fonts/CenturyGothicSemiBold.ttf) format("ttf");
+}
+
+/* Setting headings and body colors and fonts */
+h1 {
+  margin-right: 5%;
+  font-family: centuryGothic;
+
+  color: #3798d5;
+}
+h2 {
+  margin-right: 5%;
+  font-family: centuryGothic;
+
+  color: #3798d5;
+}
+h4 {
+  font-family: centuryGothic;
+
+  color: #3798d5;
+}
+body {
+  margin-left: 25%;
+  font-family: centuryGothic;
+  color: black;
+}
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  background-color: #2f7fa3; /* dark Blue */
+  width: 120px;
+  border: none;
+  color: white;
+  padding: 5px;
+  font-family: centuryGothic;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.input {
+  width: 150px;
+}
+
+.container {
+  text-align: right;
+  align-items: left;
+  height: 50px;
+  width: 125%;
+  grid-gap: 20px 20px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+}
+.container2 {
+  text-align: auto;
+  align-items: auto;
+  height: 30px;
+  width: 100%;
+  grid-gap: 20px 0px;
+  display: grid;
+  grid-template-columns: auto auto auto;
+}
+.rectangle {
+  display: flex;
+  justify-content: left;
+  height: 200%;
+  width: 30%;
+  background-color: #164357;
+}
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+* {
+  box-sizing: border-box;
+}
+
+.openButton {
+  border: none;
+  border-radius: 5px;
+  background-color: #1c87c9;
+  color: white;
+  padding: 14px 20px;
+  cursor: pointer;
+  position: fixed;
+}
+.loginPopup {
+  position: relative;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+}
+.formPopup {
+  display: none;
+  position: fixed;
+  left: 45%;
+  top: 5%;
+  transform: translate(-25%, 5%);
+  background-color: white;
+  border: 3px solid black;
+  z-index: 9;
+}
+/* .formContainer {
+  min-width: 100%;
+  min-height: 100%;
+  padding: 20px;
+  background-color: #fff;
+}
+
+.formContainer .btn {
+  padding: 12px 20px;
+  border: none;
+  background-color: #8ebf42;
+  color: #fff;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 15px;
+  opacity: 0.8;
+}
+.formContainer .cancel {
+  background-color: #cc0000;
+}
+.formContainer .btn:hover,
+.openButton:hover {
+  opacity: 1;
+} */

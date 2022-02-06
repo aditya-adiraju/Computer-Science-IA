@@ -1,0 +1,82 @@
+<link rel="stylesheet" type= "text/css" href="css/style2.css"/>
+<style>
+    .button {
+    background-color: #3898d5; /* dark Blue */
+    height: 80px;
+    width:120px;
+    border: none;
+    color: white;
+    padding: 5px;
+    font-family: centuryGothic;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    }
+</style>
+
+<script>
+    function logout() {
+        document.getElementById("LOGOUT").submit();
+    }
+</script>
+<form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
+<div class="sidebar">  
+    <img src = "img/logo.svg" alt="CISMUN logo" width="120" height="120" style="margin-left:13%"/> 
+    <% if (!user) { %>
+        <a href="/">Dashboard</a>
+    <% } %>
+
+    <a href="/resources">Resources</a>
+    <a href="/settings">Settings</a>
+    <a href="#" onclick="logout()">Logout</a>
+</div>
+
+
+<h1 style="text-align:center; margin-right: 14%;" ><b>CISMUN ONLINE DATABASE</b></h1>
+<h2 style="text-align:center;margin-right: 14%;"><b>Resources</b></h2>
+
+<div class="container2" >
+    <div>
+        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_ab23436da60448459554553265be6325.pdf' target="_blank">
+            <button class="button">
+                DELEGATE HANDBOOK
+            </button>
+        </a>
+    </div>
+    <div>
+        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_f72edaeba8214d86a36571193114fffc.pdf' target="_blank">
+            <button class="button">
+                STUDENT OFFICER HANDBOOK
+            </button>
+        </a>
+    </div>
+    <div>
+        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_ef0ed23ebd044c74bd954e3d4b042205.pdf' target="_blank">
+            <button class="button">
+                APPROVAL PANEL HANDBOOK
+            </button>
+        </a>
+    </div>
+    <div>
+        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_1c89f99a8ecc468b83af0317a7634ec8.pdf' target="_blank">
+            <button class="button">
+                REFERENCING GUIDELINES
+            </button>
+        </a>
+    </div>
+    <div>
+        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_979b7301ef184965a19fe63871414735.pdf' target="_blank">
+            <button class="button">
+                OPENING SPEECH SAMPLE
+            </button>
+        </a>
+    </div>
+    <div>
+        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_bb025c149e754ce185b15f9eddecee4f.pdf' target="_blank">
+            <button class="button">
+                RESOLUTION SAMPLE
+            </button>
+        </a>
+    </div>
+</div>
