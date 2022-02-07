@@ -53,10 +53,13 @@ connection.query(sql, (error, results, fields) => {
       nationality: results[i].Nationality,
       email: results[i].Email,
       password: results[i].Password.toString(),
-      role: results[i].Role
+      role: results[i].Role,
+      quota: results[i].Quota
     })
   }
+  console.log(users)
 });
+
 const delegates = []
 let nsql = "SELECT * FROM delegates";
 connection.query(nsql, (error, results, fields) => {
@@ -110,16 +113,9 @@ app.use(bodyParser.urlencoded({ extended : false }));
 
 //Checks whether the user is authenticated and directs to login page if they are not authenticatec
 app.get('/', checkAuthenticated, (req, res, next) => {
-  res.locals.user = req.session.passport.user;
   res.render('index.ejs', {
-    salutation: req.session.passport.user.salutation,
-    name: req.session.passport.user.name,
-    id: req.session.passport.user.id,
-    nationality: req.session.passport.user.nationality,
-    sex: req.session.passport.user.sex,
-    school: req.session.passport.user.school,
-    email: req.session.passport.user.email,
-    role: req.session.passport.user.role})
+    delegates: delegates.filter((x) => { return x.supervisor_id == req.session.passport.user.id;}),
+    user: req.session.passport.user})
 })
 
 app.get('/resources', checkAuthenticated, (req, res) => {
@@ -138,7 +134,6 @@ app.get('/admin', checkAuthenticated, checkAdmin,(req, res) => {
 
 app.get('/user/:id', checkAuthenticated, checkAdmin,(req, res) => {
     const { id } = req.params;
-    console.log(delegates.filter((x) => { return x.supervisor_id == id;}))
     res.render('delegate-table.ejs', {delegates: delegates.filter((x) => { return x.supervisor_id == id;}) , user: req.session.passport.user})    
 })
 
@@ -234,7 +229,8 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
         nationality: nationality,
         email: email,
         password: hashedPassword,
-        role: results[0].Role
+        role: results[0].Role,
+        quota: results[0].Quota
       })
     });
 
@@ -244,13 +240,12 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
   }
 })
 
-app.post('/admin/update-role', checkAuthenticated, (req,res)=> {
+app.post('/admin/update-role', checkAuthenticated, checkAdmin, (req,res)=> {
   var role = req.body.role
   var id = req.body.id
   var foundIndex = users.findIndex(user => user.id == id);
   users[foundIndex].role = role;
   let sql = 'UPDATE accounts SET Role ="' + role + '" WHERE (ID =' + id + ');'
-  console.log(sql)
   connection.query(sql, (error)=>{
     if(error){
       return console.error(error.message)
@@ -258,6 +253,37 @@ app.post('/admin/update-role', checkAuthenticated, (req,res)=> {
   })
   res.redirect('/login')
 })
+
+app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
+  var id = req.body.id
+  var quota = req.body.quota
+  var foundIndex = users.findIndex(user => user.id == id);
+  users[foundIndex].quota = quota;
+  let sql = 'UPDATE accounts SET Quota = ' + quota + ' WHERE (ID =' + id + ');'
+  console.log(sql)
+  connection.query(sql, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  res.redirect('/admin')
+})
+
+app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
+  var id = req.body.id
+  var quota = req.body.quota
+  var foundIndex = users.findIndex(user => user.id == id);
+  users[foundIndex].quota = quota;
+  let sql = 'UPDATE accounts SET Quota = ' + quota + ' WHERE (ID =' + id + ');'
+  console.log(sql)
+  connection.query(sql, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  res.redirect('/admin')
+})
+
 
 app.delete('/logout', (req, res) => {
   req.logOut()

@@ -35,75 +35,56 @@
 
 <div>
   <h4>PERSONAL INFORMATION</h4> 
-  <b>Supervisor ID: </b><%= id %><br>
-  <b>Title: </b><%= salutation %><br>
-  <b>Name: </b><%= name %><br>
-  <b>Sex: </b><%= sex %><br>
-  <b>School: </b><%= school %> <br>
-  <b>Nationality:</b> <%= nationality %> <br>
-  <b>Email Address: </b><%= email %><br>
+  <b>Supervisor ID: </b><%= user.id %><br>
+  <b>Title: </b><%= user.salutation %><br>
+  <b>Name: </b><%= user.name %><br>
+  <b>Sex: </b><%= user.sex %><br>
+  <b>School: </b><%= user.school %> <br>
+  <b>Nationality:</b> <%= user.nationality %> <br>
+  <b>Email Address: </b><%= user.email %><br>
+  <b>Quota: </b><%= user.quota %><br>
   <br>
 </div>
 
-<div class="clearfix">
-  <div style="float:left;">
-    <h4>
-      <input type="checkbox" id="delegate" name="delegate" value="delegate1">
-      <label for="delegate">Delegate 1</label>
-    </h4>
-    Name:<br>
-    Delegation:<br>
-    Committee:<br>
-    Date of Birth:<br>
-    Nationality:<br>
-    Email Address: <br><br>
-  </div>
-
-  <div style="float:right;margin-top:5%">
-    <div style="margin-bottom: 5%">
-      <img id="myImg" src="#"  alt="imagenotfound" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';" style="width:120px;height: 120px;">
+<form action="/delete-delegate" method="POST">
+<% if (delegates.length >= 1) { %>
+  <% for( let index = 0; index < delegates.length; index++ ) { %>
+    <div class="clearfix">
+      <div style="float:left;">
+        <h4><%  %> 
+          <input type="checkbox" name="delegate[]" value= <% delegates[index] %> >
+          <label for="delegate[]">Delegate <%= index + 1%> </label>
+        </h4>
+        <b>Delegate ID: </b><%= delegates[index].id %><br>
+        <b>Name: </b><%= delegates[index].name %><br>
+        <b>Delegation: </b><%= delegates[index].delegation %><br>
+        <b>Committee: </b><%= delegates[index].committee %><br>
+        <b>Date of Birth: </b><%= delegates[index].dob %><br>
+        <b>Nationality: </b><%= delegates[index].nationality %><br>
+        <b>School: </b><%= delegates[index].school %><br><br>
+      </div>
+    
+      <div style="float:right;margin-top:5%">
+        <div style="margin-bottom: 5%">
+          <img id="myImg" src="#"  alt="imagenotfound" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';" style="width:120px;height: 120px;">
+        </div>
+        <input type='file' />
+      </div>
+      </div>
     </div>
-    <input type='file' />
-      <!-- <form id="LOGOUT" action="/logout?_method=DELETE" method="POST">
-        <button class="button" type="submit"> Modify</button>
-      </form> -->
-  </div>
-  </div>
-</div>
-
-<br>
-
-<div class="clearfix">
-  <div style="float:left;">
-    <h4>
-      <input type="checkbox" id="delegate2" name="delegate2" value="delegate2">
-      <label for="delegate">Delegate 2</label>
-    </h4>
-    Name:<br>
-    Delegation:<br>
-    Committee:<br>
-    Date of Birth:<br>
-    Nationality:<br>
-    Email Address: <br><br>
-  </div>
-
-  <div style="float:right;margin-top:5%">
-    <div style="margin-bottom: 5%">
-      <img id="myImg" src="#"  alt="imagenotfound" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';" style="width:120px;height: 120px;">
-    </div>
-    <input type='file' />
-
-    <!-- <div>
-      <form id="LOGOUT" action="/logout?_method=DELETE" method="POST">
-        <button class="button" type="submit"> Modify</button>
-      </form>
-    </div> -->
-  </div>
-</div>
+    
+    <br>
+  <% } %>
+<% } %>
 
 
-<button class="button" onclick="openForm()">Add Delegate</button>
-
+<% if (delegates.length < user.quota) { %>
+  <button class="button" onclick="openForm()">Add Delegate</button>
+<% } %>
+<% if (delegates.length >= 1) { %>
+  <button class="button" type="submit">Delete Delegate</button>
+<% } %>
+</form>
 <div class="loginPopup">
   <div class="formPopup" id="popupForm">
     <form action="/" method="POST">
