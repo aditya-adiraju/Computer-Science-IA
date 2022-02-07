@@ -1,6 +1,5 @@
-<link rel="stylesheet" type= "text/css" href="css/style2.css"/>
+<%- include('./layouts/header') %>
 <style>
-
     table {
         margin-top: 32px;
         min-width: 600px;
@@ -17,7 +16,6 @@
         padding: 10px;
         border: thin solid black
     }
-
 </style>
 
 
@@ -25,7 +23,6 @@
 <form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
 <h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
 <h2 style="text-align:center;">Manage Accounts</h2>
-<h1 class="table">Manage Users</h1>
 
 <table class="table">
   <thead>
@@ -41,7 +38,7 @@
       <td><%= user.id %></td>
       <td><%= user.name %></td>
       <td><%= user.school %></td>
-      <td><%= user.email %></td>
+      <td><a href="/user/<%= user.id %>"><%= user.email %></a></td>
       <td>
         <form action="/admin/update-role" method="post">
           <input type="hidden" name="id" value="<%= user.id %>" />
