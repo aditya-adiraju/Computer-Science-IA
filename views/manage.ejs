@@ -1,8 +1,6 @@
 <%- include('./layouts/header') %>
 <style>
-    .table-container {
-        overflow-x: scroll;
-    }
+
     table {
         margin-top: 32px;
         width: 100%;
@@ -20,14 +18,75 @@
         border: thin solid black
     }
 </style>
+<% var stmts = "" %>
+<% Committees.forEach(committee => { 
+    stmts += "\<option value="+ committee.name +">" + committee.name + "\</option>"
+ }) %>
 
 <script>
+    var comm = "<%- stmts %>"
+    console.log(comm)
       function openForm() {
         document.getElementById("popupForm").style.display = "block";
     }
 
+
+    function closeForm() {
+        document.getElementById("popupForm").style.display = "none";
+    }
+    function addinputFields(){
+        var number = document.getElementById("quota").value;
+        var s = document.getElementsByName("delegate[]").length
+
+        for (i=0;i<number;i++){
+            var label = document.createElement("label");
+            label.for = "delegate[]";
+
+            label.innerHTML = "Name: ";
+            var input = document.createElement("input");
+            var b = document.createElement("br")
+            var b1 = document.createElement("br")
+
+            input.type = "text";
+            // input.style ="margin-top:5px;"
+            input.name = "delegate[]";
+
+            var title = document.createElement("h2")
+            title.style = "align-text:left"
+            title.innerHTML = "Delegate " + (i + 1 + s)
+
+            var select = document.createElement("select")
+            
+            select.name = "SelectedCommittee[]"
+            select.innerHTML = comm;
+            
+            title.appendBefore(document.getElementById('delegatefield'));
+            label.appendBefore(document.getElementById('delegatefield'));
+            input.appendBefore(document.getElementById('delegatefield'));
+            var label1 = document.createElement("label");
+            label1.innerHTML = "Committee: "
+            label1.for = "SelectedCommittee[]"
+            label1.style ="margin-top:15px;margin-right:20px"
+
+            b1.appendBefore(document.getElementById('delegatefield'));
+            label1.appendBefore(document.getElementById('delegatefield'));
+            select.appendBefore(document.getElementById('delegatefield'));
+            b.appendBefore(document.getElementById('delegatefield'));
+        }
+    }
+    Element.prototype.appendBefore = function(element) {
+    element.parentNode.insertBefore(this, element);
+    }, false;
+
+    /* Adds Element AFTER NeighborElement */
+    Element.prototype.appendAfter = function(element) {
+    element.parentNode.insertBefore(this, element.nextSibling);
+    }, false;
+
+
 </script>
 <body>
+
 <form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
 <h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
 <h2 style="text-align:center;">Manage Accounts</h2>
@@ -70,7 +129,7 @@
     <div class="formPopup" id="popupForm">
       <form action="/admin/modify-quota" method="POST">
           <h2 style="text-align:center;">Assign Quota</h2>
-          <div class="container" style="padding-left:2%">
+          <div class="container" id="fields" >
               <label for="id">Select Account: </label>
               <select class="input" name="id" required>
                   <% users.forEach(user => { %>
@@ -80,10 +139,12 @@
               <label for="quota">Quota: </label>
               <input class="input" type="number" id="quota" name="quota" required>
           </div>
-          <br><br>
+          <br>
+          <div id = "delegatefield"></div>
+          <br>
           <button class="button" type="submit">ADD</button>
-          <button type="button" class="button" onclick="closeForm()">CLOSE</button>
+          <button type="button" class="button" onclick="addinputFields()">ASSIGN QUOTA</button>
           <br><br>
       </form>
     </div>
-  </div>
+</div>

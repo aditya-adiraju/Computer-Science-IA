@@ -1,0 +1,50 @@
+<%- include('./layouts/header') %>
+
+<style>
+    table {
+        margin-top: 32px;
+        min-width: 600px;
+        border: thick solid black ;
+        border-spacing: 0;
+        padding: 16px;
+        border-radius: 16px;
+    }
+    table th{
+        padding: 10px;
+        border: medium solid black
+    }
+    table td{
+        padding: 10px;
+        border: thin solid black
+    }
+
+</style>
+
+<form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
+<h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
+<h2 style="text-align:center;">Delegate List for supervisor ID </h2>
+
+<table class="table">
+  <thead>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Delegation</th>
+    <th>Committee</th>
+    <th>DOB</th>
+    <th>Nationality</th>
+    <th>School</th>
+  </thead>
+  <tbody>
+    <% delegates.forEach(delegate => { %>
+    <tr>
+      <td><%= delegate.id %></td>
+      <td><%= delegate.name %></td>
+      <td><%= delegate.delegation %></td>
+      <td><%= delegate.committee %></td>
+      <td><%= delegate.dob %></td>
+      <td><%= delegate.nationality %></td>
+      <td><%= delegate.school %></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

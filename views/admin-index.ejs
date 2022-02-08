@@ -1,0 +1,96 @@
+<%- include('./layouts/header') %>
+<style>
+
+    table {
+        margin-top: 32px;
+        min-width: 600px;
+        border: thick solid black ;
+        border-spacing: 0;
+        padding: 16px;
+        border-radius: 16px;
+    }
+    table th{
+        padding: 10px;
+        border: medium solid black
+    }
+    table td{
+        padding: 10px;
+        border: thin solid black
+    }
+
+</style>
+
+<script>
+  function openForm() {
+    document.getElementById("popupForm").style.display = "block";
+  }
+
+  function closeForm() {
+    document.getElementById("popupForm").style.display = "none";
+  }
+
+
+  function logout() {
+      document.getElementById("LOGOUT").submit();
+  }
+
+  window.addEventListener('load', function() {
+  document.querySelector('input[type="file"]').addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+          var img = document.getElementById('myImg');
+          img.onload = () => {
+              URL.revokeObjectURL(img.src);  // no longer needed, free memory
+          }
+
+          img.src = URL.createObjectURL(this.files[0]); // set src to blob url
+      }
+  });
+});
+
+</script>
+
+<h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
+<h2 style="text-align:center;">Admin Dashboard</h2>
+
+<div>
+  <h4>PERSONAL INFORMATION</h4> 
+  <b>Supervisor ID: </b><%= user.id %><br>
+  <b>Name: </b><%= user.name %><br>
+  <b>Email Address: </b><%= user.email %><br>
+  <br>
+</div>
+
+<table class="table">
+  <thead>
+    <th>Name</th>
+    <th>Delegation</th>
+  </thead>
+  <tbody>
+    <% Committees.forEach(Committee => { %>
+    <tr>
+      <td><%= Committee.name %></td>
+      <td><%= Committee.max_delegates  %> </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<br><br>
+
+<button class="button" onclick="openForm()">Add Committee</button>
+<div class="loginPopup">
+    <div class="formPopup" id="popupForm">
+        <form action="/add-committee" method="POST">
+            <h2 style="text-align:center;">Add Committee</h2>
+            <div class="container" style="padding-left:2%">
+                <label for="name">Committee Name: </label>
+                <input class="input" type="text" id="name" name="name" required>
+                <label for="max_delegates">Maximum Delegates: </label>
+                <input class="input" type="number" id="max_delegates" name="max_delegates" required>
+            </div>
+            <br><br><br>
+            <button class="button" type="submit">ADD</button>
+            <button type="button" class="button" onclick="closeForm()">CLOSE</button>
+            <br><br>
+        </form>
+    </div>
+</div>

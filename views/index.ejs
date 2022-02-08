@@ -46,13 +46,13 @@
   <br>
 </div>
 
-<form action="/delete-delegate" method="POST">
+<form action="/delete-delegate" method="POST" id="delete_delegates">
 <% if (delegates.length >= 1) { %>
   <% for( let index = 0; index < delegates.length; index++ ) { %>
     <div class="clearfix">
       <div style="float:left;">
         <h4><%  %> 
-          <input type="checkbox" name="delegate[]" value= <% delegates[index] %> >
+          <input type="checkbox" name='delegate[]'' value="<%= delegates[index].id %>" >
           <label for="delegate[]">Delegate <%= index + 1%> </label>
         </h4>
         <b>Delegate ID: </b><%= delegates[index].id %><br>
@@ -76,20 +76,27 @@
     <br>
   <% } %>
 <% } %>
-
-
-<% if (delegates.length < user.quota) { %>
-  <button class="button" onclick="openForm()">Add Delegate</button>
-<% } %>
-<% if (delegates.length >= 1) { %>
-  <button class="button" type="submit">Delete Delegate</button>
-<% } %>
 </form>
+
+
+
+<button class="button" onclick="openForm()">Add Delegate Information</button>
+
+<% if (delegates.length >= 1) { %>
+  <button class="button" form="delete_delegates" type="submit">Delete Delegate</button>
+<% } %>
+
 <div class="loginPopup">
   <div class="formPopup" id="popupForm">
     <form action="/" method="POST">
         <h2 style="text-align:center;">Add Delegate</h2>
         <div class="container" style="padding-left:2%">
+            <label for="id">Select Delegate: </label>
+            <select class="input" name="id" required>
+                <% delegates.forEach(delegate => { %>
+                  <option value="<%= delegate.id %> "><%= delegate.id + " - " + delegate.committee+ " - " + delegate.delegation %> </option>
+                <% }) %>
+            </select>   
             <label for="name">Name: </label>
             <input class="input" type="text" id="name" name="name" required>
             <label for="dob">Date of Birth: </label>
@@ -293,7 +300,7 @@
             <label for="school">School: </label>
             <input class="input" type="school" id="school" name="school" required>
         </div>
-    
+        <br><br>
         <br><br><br>
         <br><br><br>
         <button class="button" type="submit">ADD</button>

@@ -11,13 +11,13 @@
             document.getElementById("LOGOUT").submit();
         }
     </script>
-    <link rel="stylesheet" type= "text/css" href="css/style2.css"/>
+    <link rel="stylesheet" type= "text/css" href="../../css/style2.css"/>
     <title>Document</title>
 </head>
 <body>
     <form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
     <div class="sidebar">  
-        <img src = "img/logo.svg" alt="CISMUN logo" width="120" height="120" style="margin-left:13%"/> 
+        <img class="centerimg" src = "../../img/logo.svg" alt="CISMUN logo" width="120" height="120" /> 
         <a href="/">Dashboard</a>    
         <% if (user.role == 'CLIENT') { %>
             <a href="/resources">Resources</a>

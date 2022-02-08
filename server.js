@@ -57,7 +57,6 @@ connection.query(sql, (error, results, fields) => {
       quota: results[i].Quota
     })
   }
-  console.log(users)
 });
 
 const delegates = []
@@ -81,6 +80,22 @@ connection.query(nsql, (error, results, fields) => {
       })
   }
   }
+});
+const committees = []
+let msql = "SELECT * FROM committees";
+connection.query(msql, (error, results, fields) => {
+  if (error) {
+    // Displays the error (if any) on the console
+    return console.error(error.message)
+  }
+  for (var i = 0; i < results.length; i++) {
+    if (!committees.find(Committee => Committee.name == results[i].committee)){
+      committees.push({  
+        name: results[i].Committee,
+        max_delegates: results[i].Max_Delegates
+      })
+  }
+}
 });
 //Initializing Passport settings 
 const initializePassport = require('./passport-config')
@@ -113,9 +128,16 @@ app.use(bodyParser.urlencoded({ extended : false }));
 
 //Checks whether the user is authenticated and directs to login page if they are not authenticatec
 app.get('/', checkAuthenticated, (req, res, next) => {
-  res.render('index.ejs', {
-    delegates: delegates.filter((x) => { return x.supervisor_id == req.session.passport.user.id;}),
-    user: req.session.passport.user})
+  if (req.session.passport.user.role == roles.admin){
+    res.render('admin-index.ejs', {
+      delegates: delegates.filter((x) => { return x.supervisor_id == req.session.passport.user.id;}),
+      user: req.session.passport.user, Committees: committees}
+      )
+  } else{
+      res.render('index.ejs', {
+      delegates: delegates.filter((x) => { return x.supervisor_id == req.session.passport.user.id;}),
+      user: req.session.passport.user})
+  }
 })
 
 app.get('/resources', checkAuthenticated, (req, res) => {
@@ -129,7 +151,7 @@ app.get('/settings', checkAuthenticated, (req, res) => {
 })
 
 app.get('/admin', checkAuthenticated, checkAdmin,(req, res) => {
-  res.render('manage.ejs', { users, user: req.session.passport.user })
+  res.render('manage.ejs', { users, user: req.session.passport.user, Committees: committees})
 })
 
 app.get('/user/:id', checkAuthenticated, checkAdmin,(req, res) => {
@@ -146,36 +168,47 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 })
 
 app.post('/', checkAuthenticated, (req,res)=> {
-  var supervisor_id = req.session.passport.user.id
+  var delegate_id = req.body.id
   var name = req.body.name
   var school = req.body.school
   var nationality = req.body.nationality
   var dob = req.body.dob
 
-  
-
-  let insertStatement = 'INSERT INTO delegates(Delegate_ID, Name, DOB, School, Nationality, Supervisor_ID) VALUES(NULL,"'+ name +'","' + dob +'","'+ school +'","' + nationality +'","' + supervisor_id+'")'
-
+  let insertStatement = 'UPDATE delegates SET Name = "' + name + '", School = "'+ school + '", DOB = "'+ dob + '", Nationality = "'+ nationality + '" WHERE (Delegate_ID =' + delegate_id + ')'
   connection.query(insertStatement, (error)=>{
     if(error){
       return console.error(error.message)
     }
   })
-  let sql = "SELECT * FROM delegates ORDER BY Delegate_ID DESC LIMIT 1" 
+  var i = delegates.findIndex(x => x.id == delegate_id);
+  delegates[i].name = name;
+  delegates[i].school = school;
+  delegates[i].dob = dob;
+  delegates[i].nationality = nationality;
+  res.redirect('/login')
+})
+app.post('/add-committee', checkAuthenticated, (req,res)=> {
+  var name = req.body.name
+  var max_delegates = req.body.max_delegates
+
+  let insertStatement = 'INSERT INTO committees(Committee_ID, Committee, Max_Delegates) VALUES(NULL,"'+ name +'","' + max_delegates +'")'
+  connection.query(insertStatement, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+
+
+  let sql = "SELECT * FROM committees ORDER BY Committee_ID DESC LIMIT 1" 
   connection.query(sql, (error, results, fields) => {
     if (error) {
       // Displays the error (if any) on the console
       return console.error(error.message)
     }
-    delegates.push({
-      id: results[0].Delegate_ID,
-      name: results[0].Name,
-      committee: results[0].Committee,
-      delegation: results[0].Delegation,
-      school: results[0].School,
-      nationality: results[0].Nationality,
-      dob: results[0].DOB,
-      supervisor_id: results[0].Supervisor_ID
+
+    committees.push({
+      name: results[0].Committee,
+      max_delegates: results[0].Max_Delegates
     })
   });
   res.redirect('/login')
@@ -257,6 +290,8 @@ app.post('/admin/update-role', checkAuthenticated, checkAdmin, (req,res)=> {
 app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
   var id = req.body.id
   var quota = req.body.quota
+  var del_list = req.body['delegate[]'];
+  var committee_list = req.body['SelectedCommittee[]'];
   var foundIndex = users.findIndex(user => user.id == id);
   users[foundIndex].quota = quota;
   let sql = 'UPDATE accounts SET Quota = ' + quota + ' WHERE (ID =' + id + ');'
@@ -266,22 +301,102 @@ app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
       return console.error(error.message)
     }
   })
+  sql = '';
+  if (del_list){
+    if (Array.isArray(del_list)){
+      for( let index = 0; index < del_list.length; index++ ) {
+        //parallel arrays
+        sql += 'INSERT INTO delegates(Delegate_ID, Delegation, Committee, Supervisor_ID) VALUES(NULL,"' + del_list[index] +'","' + committee_list[index] + '","' + id+'");'
+      }
+      connection.query(sql, (error)=>{
+        if(error){
+          return console.error(error.message)
+        }
+      })
+      let stmt = 'SELECT * FROM delegates ORDER BY Delegate_ID DESC LIMIT '  + del_list.length  
+      connection.query(stmt, (error, results, fields) => {
+        if (error) {
+          // Displays the error (if any) on the console
+          return console.error(error.message)
+        }
+        for (var i = 0; i < results.length; i++) {
+          if (!delegates.find(delegate => delegate.id == results[i].Delegate_ID)){
+            delegates.push({
+              id: results[i].Delegate_ID,
+              name: results[i].Name,
+              committee: results[i].Committee,
+              delegation: results[i].Delegation,
+              school: results[i].School,
+              nationality: results[i].Nationality,
+              dob: results[i].DOB,
+              supervisor_id: results[i].Supervisor_ID
+            })
+        }
+        }
+      });
+
+    }
+    else{
+      sql = 'INSERT INTO delegates(Delegate_ID, Delegation, Committee, Supervisor_ID) VALUES(NULL,"' + del_list +'","' + committee_list + '","' + id+'")'
+      connection.query(sql, (error)=>{
+        if(error){
+          return console.error(error.message)
+        }
+      })
+      let stmt = "SELECT * FROM delegates ORDER BY Delegate_ID DESC LIMIT 1" 
+      connection.query(stmt, (error, results, fields) => {
+        if (error) {
+          // Displays the error (if any) on the console
+          return console.error(error.message)
+        }
+        delegates.push({
+          id: results[0].Delegate_ID,
+          name: results[0].Name,
+          committee: results[0].Committee,
+          delegation: results[0].Delegation,
+          school: results[0].School,
+          nationality: results[0].Nationality,
+          dob: results[0].DOB,
+          supervisor_id: results[0].Supervisor_ID
+        })
+      });
+    }
+    console.log(sql)
+
+  }
   res.redirect('/admin')
 })
 
-app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
-  var id = req.body.id
-  var quota = req.body.quota
-  var foundIndex = users.findIndex(user => user.id == id);
-  users[foundIndex].quota = quota;
-  let sql = 'UPDATE accounts SET Quota = ' + quota + ' WHERE (ID =' + id + ');'
-  console.log(sql)
-  connection.query(sql, (error)=>{
-    if(error){
-      return console.error(error.message)
+app.post('/delete-delegate', checkAuthenticated, (req,res)=> {
+  console.log(req.body['delegate[]'])
+  var delegate = req.body['delegate[]'];
+  let sql = '';
+  if (delegate){
+    if (Array.isArray(delegate)){
+      for( let index = 0; index < delegate.length; index++ ) {
+        sql += 'DELETE FROM delegates WHERE (Delegate_ID = ' + delegate[index] + ');'
+        var i = delegates.findIndex(x => x.id == delegate[index]);
+        if (i > -1) {
+          delegates.splice(i, 1); // 2nd parameter means remove one item only
+        }
+      }
+ 
     }
-  })
-  res.redirect('/admin')
+    else{
+      sql = 'DELETE FROM delegates WHERE (DELEGATE_ID =' + delegate + ');'
+      var index = delegates.findIndex(x => x.id == delegate);
+      if (index > -1) {
+        delegates.splice(index, 1); // 2nd parameter means remove one item only
+      } 
+    }
+
+    connection.query(sql, (error)=>{
+      if(error){
+        return console.error(error.message)
+      }
+    })
+  }
+  res.redirect('/')
 })
 
 
