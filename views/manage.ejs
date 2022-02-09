@@ -25,14 +25,19 @@
 
 <script>
     var comm = "<%- stmts %>"
-    console.log(comm)
+
       function openForm() {
         document.getElementById("popupForm").style.display = "block";
     }
 
-
     function closeForm() {
         document.getElementById("popupForm").style.display = "none";
+    }
+    function openForm2() {
+        document.getElementById("popupForm2").style.display = "block";
+    }
+    function closeForm2() {
+        document.getElementById("popupForm2").style.display = "none";
     }
     function addinputFields(){
         var number = document.getElementById("quota").value;
@@ -90,6 +95,8 @@
 <form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
 <h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
 <h2 style="text-align:center;">Manage Accounts</h2>
+
+<div  style="margin-bottom: 0%; text-align:center;color:blue"><% if (message) { %><%= message %><%} %></div>
 <div class="table-container">
     <table class="table">
     <thead>
@@ -124,7 +131,11 @@
     </table>
 </div>
 <br><br>
-<span class="center"> <button class="button" onclick="openForm()" style="max-width: 100%, ">Assign Quota</button></span>
+
+     <button class="button" onclick="openForm()" style="max-width: 100%, ">ASSIGN DELEGATES</button>
+
+    <button class="button" onclick="openForm2()" style="max-width: 100%, ">SEND INVOICE</button>
+
 <div class="loginPopup">
     <div class="formPopup" id="popupForm">
       <form action="/admin/modify-quota" method="POST">
@@ -142,8 +153,27 @@
           <br>
           <div id = "delegatefield"></div>
           <br>
-          <button class="button" type="submit">ADD</button>
-          <button type="button" class="button" onclick="addinputFields()">ASSIGN QUOTA</button>
+          <button class="button" type="submit">SUBMIT</button>
+          <button type="button"   class="button" style="max-width:100%" onclick="addinputFields()">ASSIGN DELEGATES</button>
+          <br><br>
+          <button type="button" class="button" onclick="closeForm()">CLOSE</button>
+      </form>
+    </div>
+</div>
+<div class="loginPopup">
+    <div class="formPopup" id="popupForm2">
+      <form action="/admin/send-invoice" method="POST">
+          <h2 style="text-align:center;">Assign Quota</h2>
+          <div class="container" id="fields" >
+              <label for="id">Select Account: </label>
+              <select class="input" style="height:20px;" name="id" required>
+                  <% users.forEach(user => { %>
+                    <option value="<%= user.id %> "><%= user.id + " - " + user.name %> </option>
+                  <% }) %>
+              </select> 
+          </div>
+          <button class="button" type="submit">SEND</button>
+          <button type="button" class="button" onclick="closeForm2()">CLOSE</button>          
           <br><br>
       </form>
     </div>

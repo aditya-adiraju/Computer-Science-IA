@@ -1,23 +1,11 @@
 <%- include('./layouts/header') %>
 <style>
-    .button {
-    background-color: #3898d5; /* dark Blue */
-    height: 80px;
-    width:120px;
-    border: none;
-    color: white;
-    padding: 5px;
-    font-family: centuryGothic;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    }
 </style>
 
 <script>
       function openForm() {
     document.getElementById("popupForm").style.display = "block";
+
   }
 
   function closeForm() {
@@ -32,17 +20,17 @@
 
 <h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
 <h2 style="text-align:center;">Settings</h2>
-
-<span class="center"> <button class="button" onclick="openForm()" style="max-width: 100%, ">Change Password</button></span>
+<div class="center" style="color:red;margin-right:5%"><% if (messages.error) { %><%= messages.error %> <br> <%} %></div>
+<span class="center" style="margin-right:5%"> <button class="button" onclick="openForm()" style="max-width: 100%, ">Change Password</button></span>
 <div class="loginPopup">
     <div class="formPopup" id="popupForm">
-        <form action="/add-committee" method="POST">
-            <h2 style="text-align:center;">Add Committee</h2>
+        <form action="/settings/change-password" method="POST">
+            <h2 style="text-align:center;">Change Password: </h2>
             <div class="container" style="padding-left:2%">
-                <label for="name">Committee Name: </label>
-                <input class="input" type="text" id="name" name="name" required>
-                <label for="max_delegates">Maximum Delegates: </label>
-                <input class="input" type="number" id="max_delegates" name="max_delegates" required>
+                <label for="password">New Password: </label>
+                <input class="input" type="text" id="password" name="password" required>
+                <label for="confirmPassword">Confirm Password: </label>
+                <input class="input" type="text" id="confirmPassword" name="confirmPassword" required>
             </div>
             <br><br><br>
             <button class="button" type="submit">ADD</button>

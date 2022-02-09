@@ -1,13 +1,9 @@
 //Including classes
-const Delegate = require('./delegate.js')
-const Advisor = require('./advisor.js')
-const Delegation = require('./delegation.js')
 const config = require('./config.json')
 const { roles } = require('./constants');
 
-
 //Including External libraries
-const express = require('express') //Build web app, handle and funnel requests
+const express = require('express') //Build web app, handle post and requests
 const flash = require('express-flash') 
 const session = require('express-session')
 const bcrypt = require('bcrypt') //password hashing
@@ -22,14 +18,6 @@ if (process.env.NODE_ENV !== 'production') {
 const app = express()
 var path = require('path');
 
-
-/*
-Object Serialization/Deserialization
-Password Authentication
-Classes and Object Oriented Structure
-User defined Methods
-Error Handling and Validation Techniques
-*/
 
 //creating a connection to MySQL Database
 let connection = mysql.createConnection(config);
@@ -151,13 +139,23 @@ app.get('/settings', checkAuthenticated, (req, res) => {
 })
 
 app.get('/admin', checkAuthenticated, checkAdmin,(req, res) => {
-  res.render('manage.ejs', { users, user: req.session.passport.user, Committees: committees})
+  res.render('manage.ejs', { message: null ,users, user: req.session.passport.user, Committees: committees})
 })
 
 app.get('/user/:id', checkAuthenticated, checkAdmin,(req, res) => {
     const { id } = req.params;
-    res.render('delegate-table.ejs', {delegates: delegates.filter((x) => { return x.supervisor_id == id;}) , user: req.session.passport.user})    
+    var del_names = []
+    delegates.forEach(del => 
+      del_names.push(del.name));
+    res.render('delegate-table.ejs', {names: del_names, delegates: delegates.filter((x) => { return x.supervisor_id == id;}) , user: req.session.passport.user, id })    
 })
+
+app.get('/delegates', checkAuthenticated, checkAdmin, (req, res) => {
+  var del_names = []
+  delegates.forEach(del => del_names.push(del.name));
+  res.render('delegate-table.ejs', {names: del_names, delegates: delegates , user: req.session.passport.user, users})    
+})
+
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
   res.render('login.ejs')
@@ -187,6 +185,23 @@ app.post('/', checkAuthenticated, (req,res)=> {
   delegates[i].nationality = nationality;
   res.redirect('/login')
 })
+
+app.post('/display-delegates', checkAuthenticated, checkAdmin, (req,res)=> {
+  var del_names = req.body.delegate.split(",")
+  var del_list = []
+  del_names.forEach(name => {
+    const index = delegates.findIndex(del => del.name == name);
+    del_list.push(delegates[index])
+  });
+
+  console.log(del_list)
+  res.render('delegate-table.ejs',{delegates: del_list , names: del_names, user: req.session.passport.user, users} )
+})
+
+app.post('/admin/send-invoice', checkAuthenticated, checkAdmin, (req,res)=> {
+  res.render('manage.ejs', { message: "Email was sent to Supervisor " + users[users.findIndex(user => user.id == req.body.id)].name+ "!" ,users, user: req.session.passport.user, Committees: committees} )
+})
+
 app.post('/add-committee', checkAuthenticated, (req,res)=> {
   var name = req.body.name
   var max_delegates = req.body.max_delegates
@@ -239,7 +254,6 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
       var role = roles.client
     }
     let insertStatement = 'INSERT INTO accounts(ID, Salutation, Name, Sex, School, Nationality, Email, Password, Role) VALUES(NULL,"'+ salutation +'","' + name +'","'+ sex +'","' + school +'","' + nationality +'","' + email +'","' + hashedPassword +'","' + role +'")'
-
 
     connection.query(insertStatement, (error)=>{
       if(error){
@@ -295,7 +309,6 @@ app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
   var foundIndex = users.findIndex(user => user.id == id);
   users[foundIndex].quota = quota;
   let sql = 'UPDATE accounts SET Quota = ' + quota + ' WHERE (ID =' + id + ');'
-  console.log(sql)
   connection.query(sql, (error)=>{
     if(error){
       return console.error(error.message)
@@ -337,7 +350,7 @@ app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
 
     }
     else{
-      sql = 'INSERT INTO delegates(Delegate_ID, Delegation, Committee, Supervisor_ID) VALUES(NULL,"' + del_list +'","' + committee_list + '","' + id+'")'
+      sql = 'INSERT INTO delegates(Delegate_ID, Delegation, Committee, Supervisor_ID) VALUES(NULL,"' + del_list +'","' + committee_list + '",' + id +')'
       connection.query(sql, (error)=>{
         if(error){
           return console.error(error.message)
@@ -361,14 +374,12 @@ app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
         })
       });
     }
-    console.log(sql)
 
   }
   res.redirect('/admin')
 })
 
 app.post('/delete-delegate', checkAuthenticated, (req,res)=> {
-  console.log(req.body['delegate[]'])
   var delegate = req.body['delegate[]'];
   let sql = '';
   if (delegate){
@@ -399,6 +410,33 @@ app.post('/delete-delegate', checkAuthenticated, (req,res)=> {
   res.redirect('/')
 })
 
+app.post('/settings/change-password', checkAuthenticated, async (req,res)=> {
+  try{
+  const hashedPassword = await bcrypt.hash(req.body.password, 10)
+  var id = req.session.passport.user.id
+  var password = req.body.password
+  var confirmPassword = req.body.confirmPassword
+  
+
+  if (password != confirmPassword){
+    res.render('settings.ejs', {user: req.session.passport.user, messages: {error: "Passwords Do not Match"} })
+  }
+  
+  let sql = 'UPDATE accounts SET Password = "' + hashedPassword + '" WHERE (ID =' + id + ');'
+  connection.query(sql, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  var i = users.findIndex(x => x.id == id);
+  users[i].password = hashedPassword;
+
+  res.redirect('/login')
+  } catch(e){
+    res.redirect('/settings')
+  }
+  
+})
 
 app.delete('/logout', (req, res) => {
   req.logOut()
@@ -442,5 +480,16 @@ function checkAdmin(req, res, next) {
 }
 //PORT 3000
 const PORT = process.env.PORT || 3000;
-console.log(`🚀 @  http://localhost:${PORT}`)
+console.log(`🚀  @  http://localhost:${PORT}`)
 app.listen(PORT)
+
+/*
+
+libraries 
+relational database and sql
+authentication module (passwords)
+Linear Search Algorithm
+Lists and tuples as data strucutres
+GUI
+Error-Handling
+*/

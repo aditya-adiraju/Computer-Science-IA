@@ -6,13 +6,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        function logout() {
-            document.getElementById("LOGOUT").submit();
-        }
-    </script>
     <link rel="stylesheet" type= "text/css" href="../../css/style2.css"/>
-    <title>Document</title>
+    <title>MUN CONFERENCE MANAGEMENT SYSTEM</title>
 </head>
 <body>
     <form id="LOGOUT" action="/logout?_method=DELETE" method="POST"></form>
@@ -22,9 +17,11 @@
         <% if (user.role == 'CLIENT') { %>
             <a href="/resources">Resources</a>
             <a href="/settings">Settings</a>
+            <a href="/generate-invoice">Create Invoice</a>
         <% } %>
         <% if (user.role == 'ADMIN') { %>
             <a href="/admin">Manage</a>
+            <a href="/delegates">Delegates</a>
         <% } %>
         <a href="#" onclick="logout()">Logout</a>
     </div>
