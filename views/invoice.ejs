@@ -1,0 +1,135 @@
+<style>
+    .center {
+        text-align: center;
+    }
+    .button {
+        background-color: #2f7fa3; /* dark Blue */
+        width: 120px;
+        border: none;
+        color: white;
+        padding: 5px;
+        font-family: centuryGothic;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+    }
+
+    table {
+
+        border-spacing: 0;
+        padding: 16px;
+        border-radius: 16px;
+        font-size: 12px;
+    }
+    table th{
+        padding: 10px;
+        border: thin solid black;
+        width: 100px;
+        text-align: left;
+    }
+
+    table td{
+        padding: 10px;
+        border: thin solid black;
+        width: 100px;
+    }
+    .side-by-side {
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
+
+<body>
+    
+   <div class="side-by-side">
+        <span>
+            <img src = "../img/logo.png" alt="CISMUN logo" width="100" height="100" /> <br><br>
+            <strong>Company Name</strong><br>
+            Address Line 1<br>
+            Address Line 2
+        </span>
+        <span>
+            <table>
+                <thead>
+                    <th>Invoice #</th>
+                    <th><%= user.id  %> </th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Invoice Date</td>
+                        <td id="date"></td>
+                    </tr>
+                    <tr>
+                        <td>Advisor Name </td>
+                        <td><%= user.name  %> </td>
+                    </tr>
+                    <tr>
+                        <td>Email </td>
+                        <td><%= user.email  %> </td>
+                    </tr>
+                    <tr>
+                        <td>School </td>
+                        <td><%= user.school  %> </td>
+                    </tr>
+                </tbody>
+            </table>
+        </span>
+    </div>
+
+    <hr style="height: 5px;background-color:3798d5;">
+
+    <span>
+        <table style="width:100%">
+            <thead>
+                <th style="text-align: center;">Item #</th>
+                <th style="text-align: center;">Description</th>
+                <th style="text-align: center;">Quantity</th>
+                <th style="text-align: center;">Price/item</th>
+                <th style="text-align: center;">Amount</th>
+            </thead>
+            <tbody>
+                <% var sum = 0 %> 
+                <% for( let index = 0; index < invoice.length; index++ ) { %>
+                    <% sum += invoice[index].price * user.quota %> 
+                    <tr>
+                        <td><%= index + 1%></td>
+                        <td> <%= invoice[index].description %> </td>
+                        <td> <%= user.quota %> </td>
+                        <td> <%= invoice[index].price %> </td>
+                        <td> <%= invoice[index].price * user.quota %> </td>
+
+
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+    <hr style="height: 5px;background-color:3798d5;">
+    <div class="side-by-side">
+        <span> <h2>INVOICE TOTAL</h2></span>
+        <span style="margin-right:10%"> <h2><%= sum %> </h2></span>
+    </div>  
+    </span>
+    <hr style="height: 5px;background-color:3798d5;">
+    <br>
+    <strong>Account Details</strong><br>
+    Payment Details<br>
+    Bank Details<br>
+    Currency Details<br>
+    <div class="center">
+        <button class="button" onclick="window.location.href = '/';">Back</button>
+        <button class="button" onclick="window.print()">Print</button>
+    </div>
+    <script>
+        n =  new Date();
+        y = n.getFullYear();
+        m = n.getMonth() + 1;
+        d = n.getDate();
+        document.getElementById("date").innerHTML = d + "/" + m + "/" + y;
+    </script>
+</body>
+
+
+
+

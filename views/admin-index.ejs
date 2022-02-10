@@ -1,6 +1,5 @@
 <%- include('./layouts/header') %>
 <style>
-
     table {
         margin-top: 32px;
         min-width: 600px;
@@ -11,7 +10,9 @@
     }
     table th{
         padding: 10px;
-        border: medium solid black
+        border: thin solid black;
+        background-color: #3798d5;
+        color: white;
     }
     table td{
         padding: 10px;
@@ -21,12 +22,12 @@
 </style>
 
 <script>
-  function openForm() {
-    document.getElementById("popupForm").style.display = "block";
+  function openForm(n) {
+    document.getElementById("popupForm"+ n).style.display = "block";
   }
 
-  function closeForm() {
-    document.getElementById("popupForm").style.display = "none";
+  function closeForm(n) {
+    document.getElementById("popupForm"+n).style.display = "none";
   }
 
 
@@ -57,8 +58,10 @@
   <b>Supervisor ID: </b><%= user.id %><br>
   <b>Name: </b><%= user.name %><br>
   <b>Email Address: </b><%= user.email %><br>
+  <b>Total Delegates: </b><%= delegates.length %><br>
   <br>
 </div>
+
 
 <table class="table">
   <thead>
@@ -76,7 +79,7 @@
 </table>
 <br><br>
 
-<button class="button" onclick="openForm()">Add Committee</button>
+<button class="button" onclick="openForm('')">Add Committee</button>
 <div class="loginPopup">
     <div class="formPopup" id="popupForm">
         <form action="/add-committee" method="POST">
@@ -89,8 +92,62 @@
             </div>
             <br><br><br>
             <button class="button" type="submit">ADD</button>
-            <button type="button" class="button" onclick="closeForm()">CLOSE</button>
+            <button type="button" class="button" onclick="closeForm('')">CLOSE</button>
             <br><br>
         </form>
     </div>
+</div>
+
+<table class="table">
+  <thead>
+    <th>Resource</th>
+  </thead>
+  <tbody>
+    <% resources.forEach(resource => { %>
+    <tr>
+      <td><a href="<%=resource.link %>"><%= resource.name %></a></td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<br><br>
+
+<button class="button" onclick="openForm(1)">Add Resource</button>
+
+<button class="button" onclick="openForm(2)">Delete Resource</button>
+<div class="loginPopup">
+    <div class="formPopup" id="popupForm1">
+        <form action="/add-resource" method="POST">
+            <h2 style="text-align:center;">Add Resource</h2>
+            <div class="container" style="padding-left:2%">
+                <label for="name">Resource Name: </label>
+                <input class="input" type="text" id="name" name="name" required>
+                <label for="link">Resource Link: </label>
+                <input class="input" type="url" id="link" name="link" required>
+            </div>
+            <br><br><br>
+            <button class="button" type="submit">ADD</button>
+            <button type="button" class="button" onclick="closeForm(1)">CLOSE</button>
+            <br><br>
+        </form>
+    </div>
+</div>
+<div class="loginPopup">
+  <div class="formPopup" id="popupForm2">
+    <form action="/delete-resource" method="POST">
+        <h2 style="text-align:center;">Delete Cost</h2>
+        <div class="container" style="padding-left:2%">
+            <label for="id">Select Item: </label>
+            <select class="input" name="id" required>
+                <% resources.forEach(resource => { %>
+                  <option value="<%= resource.id %> "><%= resource.id + " - " + resource.name %> </option>
+                <% }) %>
+            </select>   
+        </div>
+        <button class="button" type="submit">DELETE</button>
+        <button type="button" class="button" onclick="closeForm(2)">CLOSE</button>
+        <br><br>
+
+    </form>
+  </div>
 </div>

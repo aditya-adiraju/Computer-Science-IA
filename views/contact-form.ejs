@@ -1,0 +1,53 @@
+<link rel="stylesheet" type= "text/css" href="css/style1.css"/>
+<style>
+    .container {
+    text-align: right;
+    align-items: left;
+    height: 100px;
+    width: 125%;
+    grid-gap: 20px 20px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    }
+</style>
+
+<script type="text/javascript">
+    function showfield(name){
+        if(name == 'Other') {
+            document.getElementById('div1').innerHTML = 'Other: <input type="text" name="Other" />';
+        }
+        else {
+            document.getElementById('div1').innerHTML='';
+        }	
+    }
+</script>
+
+<h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
+<h3 style="text-align:center;">CONTACT US</h3>
+
+
+<form action="/contact" method="POST">
+    <div class="container">
+        <label for="name">Name: </label>
+        <input class="input" type="text" id="name" name="name" required>
+        <label for="school">School: </label>
+        <input class="input" type="school" id="school" name="school" required>
+        <label for="email">Email: </label>
+        <input class="input" type="email" id="email" name="email" required>
+        <label for="msg">Message: </label>
+        <textarea id="msg" name="msg" rows="10"></textarea>
+    </div>
+    <br><br><br>
+    <br><br><br>
+    <br><br><br>
+    <br>
+
+
+    <div class="center">
+        <button class="button" type="submit">SEND</button>
+    </div>  
+</form>
+
+<div class="center">
+    <a href="/login"> Already have an account? Login</a>
+</div>

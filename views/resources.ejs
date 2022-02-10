@@ -18,46 +18,16 @@
 <h2 style="text-align:center;margin-right: 14%;"><b>Resources</b></h2>
 
 <div class="container2" >
+    <% resources.forEach(resource => { %>
+     
+
     <div>
-        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_ab23436da60448459554553265be6325.pdf' target="_blank">
+        <a href='<%=resource.link%>' target="_blank">
             <button class="button">
-                DELEGATE HANDBOOK
+                <%=resource.name%> 
             </button>
         </a>
     </div>
-    <div>
-        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_f72edaeba8214d86a36571193114fffc.pdf' target="_blank">
-            <button class="button">
-                STUDENT OFFICER HANDBOOK
-            </button>
-        </a>
-    </div>
-    <div>
-        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_ef0ed23ebd044c74bd954e3d4b042205.pdf' target="_blank">
-            <button class="button">
-                APPROVAL PANEL HANDBOOK
-            </button>
-        </a>
-    </div>
-    <div>
-        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_1c89f99a8ecc468b83af0317a7634ec8.pdf' target="_blank">
-            <button class="button">
-                REFERENCING GUIDELINES
-            </button>
-        </a>
-    </div>
-    <div>
-        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_979b7301ef184965a19fe63871414735.pdf' target="_blank">
-            <button class="button">
-                OPENING SPEECH SAMPLE
-            </button>
-        </a>
-    </div>
-    <div>
-        <a href='https://0678677d-fea9-4088-9b62-18367b55d3b6.filesusr.com/ugd/c1a757_bb025c149e754ce185b15f9eddecee4f.pdf' target="_blank">
-            <button class="button">
-                RESOLUTION SAMPLE
-            </button>
-        </a>
-    </div>
+    <% }) %>
+
 </div>

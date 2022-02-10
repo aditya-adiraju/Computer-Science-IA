@@ -20,7 +20,9 @@ table {
     }
     table th{
         padding: 10px;
-        border: medium solid black
+        border: thin solid black;
+        background-color: #3798d5;
+        color: white;
     }
     table td{
         padding: 10px;
@@ -201,7 +203,7 @@ table {
   }
   function submitForm(){  
         const trie = new Autocomplete(delegates)
-        var arr = trie.getAutocompleteListBfs(document.myForm.delegate.value)
+        var arr = trie.getAutocompleteListBfs(document.myForm.delegate.value.trim())
         document.myForm.delegate.value = arr.join()
         document.myForm.submit()
     }
@@ -321,7 +323,7 @@ table {
   <form id="myForm" name="myForm" method="post" action="/display-delegates" autocomplete="off"  >
     <div class="autocomplete" style="width:300px;">
       <input id="delegate" type="text" name="delegate" placeholder="Search..." required>
-      <button class="button" onclick="submitForm()">SUBMIT</button>
+      <button class="button" onclick="submitForm()">SEARCH</button>
     </div>
   </form>
   <table class="table">
@@ -336,24 +338,26 @@ table {
       <th>Supervisor ID</th>
     </thead>
     <tbody>
-      <% delegates.forEach(delegate => { %>        
-      <tr>
-        <td><%= delegate.id %></td>
-        <td><%= delegate.name %></td>
-        <td><%= delegate.delegation %></td>
-        <td><%= delegate.committee %></td>
-        <td><%= delegate.dob %></td>
-        <td><%= delegate.nationality %></td>
-        <td><%= delegate.school %></td>
-        <td><%= delegate.supervisor_id %></td>
-      </tr>
+      <% delegates.forEach(delegate => { %> 
+        <% if (delegate) { %>    
+          <tr>
+            <td><%= delegate.id %></td>
+            <td><%= delegate.name %></td>
+            <td><%= delegate.delegation %></td>
+            <td><%= delegate.committee %></td>
+            <td><%= delegate.dob %></td>
+            <td><%= delegate.nationality %></td>
+            <td><%= delegate.school %></td>
+            <td><%= delegate.supervisor_id %></td>
+          </tr>
+        <% } %>   
       <% }) %>
     </tbody>
   </table>
 <script>
 
-var delegates = <%- JSON.stringify(names) %>;
-autocomplete(document.getElementById("delegate"), delegates.filter(Boolean));
+var allDelegates = <%- JSON.stringify(names) %>;
+autocomplete(document.getElementById("delegate"), allDelegates.filter(Boolean));
 
 </script>
 

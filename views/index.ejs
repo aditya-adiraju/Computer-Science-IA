@@ -14,18 +14,6 @@
       document.getElementById("LOGOUT").submit();
   }
 
-  window.addEventListener('load', function() {
-  document.querySelector('input[type="file"]').addEventListener('change', function() {
-      if (this.files && this.files[0]) {
-          var img = document.getElementById('myImg');
-          img.onload = () => {
-              URL.revokeObjectURL(img.src);  // no longer needed, free memory
-          }
-
-          img.src = URL.createObjectURL(this.files[0]); // set src to blob url
-      }
-  });
-});
 
 </script>
 
@@ -64,12 +52,12 @@
         <b>School: </b><%= delegates[index].school %><br><br>
       </div>
     
-      <div style="float:right;margin-top:5%">
+      <!-- <div style="float:right;margin-top:5%">
         <div style="margin-bottom: 5%">
           <img id="myImg" src="#"  alt="imagenotfound" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';" style="width:120px;height: 120px;">
         </div>
         <input type='file' />
-      </div>
+      </div> -->
       </div>
     </div>
     
@@ -80,7 +68,7 @@
 
 
 
-d
+
 <% if (delegates.length >= 1) { %>
   <button class="button" onclick="openForm()">Add Delegate Information</button>
   <button class="button" form="delete_delegates" type="submit">Delete Delegate</button>
@@ -100,7 +88,7 @@ d
             <label for="name">Name: </label>
             <input class="input" type="text" id="name" name="name" required>
             <label for="dob">Date of Birth: </label>
-            <input class="input" type="date" id="dob" name="dob" required>
+            <input class="input" type="date" id="dob" name="dob" max="2017-04-30" required>
             <label for="nationality">Nationality: </label>
             <select class="input" name="nationality" required>
                 <option disabled value="" selected>-- select one --</option>
@@ -299,11 +287,34 @@ d
             </select>   
             <label for="school">School: </label>
             <input class="input" type="school" id="school" name="school" required>
-        </div>
+            <br><br>
+
+          </div>
+          <br><br>
+          <br><br>
+          <br><br>
+          <br><br>
         <button class="button" type="submit">ADD</button>
         <button type="button" class="button" onclick="closeForm()">CLOSE</button>
         <br><br>
 
     </form>
+
   </div>
 </div>
+<script>
+  const str1 = '5';
+
+console.log(str1.padStart(2, '0'));
+    n =  new Date();
+    y = n.getFullYear() - 14
+    m = n.getMonth() + 1;
+    mm = m.toString()
+    mm = mm.padStart(2, '0')
+    d = n.getDate();
+    dd = d.toString()
+    dd = dd.padStart(2, '0')
+    document.getElementById("dob").max =  y + '-' + mm +'-' + dd;
+console.log(y + '-' + mm +'-' + dd);
+</script>
+</body>

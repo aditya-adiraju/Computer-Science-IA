@@ -16,15 +16,19 @@
         <a href="/">Dashboard</a>    
         <% if (user.role == 'CLIENT') { %>
             <a href="/resources">Resources</a>
-            <a href="/settings">Settings</a>
-            <a href="/generate-invoice">Create Invoice</a>
+            <a href="/generate-invoice">Invoice</a>
+            
         <% } %>
         <% if (user.role == 'ADMIN') { %>
-            <a href="/admin">Manage</a>
+            <a href="/admin">Accounts</a>
             <a href="/delegates">Delegates</a>
+            <a href="/finance"> Finance </a>
         <% } %>
-        <a href="#" onclick="logout()">Logout</a>
+        <a href="/settings">Settings</a>
+        <a href="#" onclick="logout()">Logout</a>   
+        <a href="/contact"> Contact Us </a>
     </div>
+    
 
 
 </body>

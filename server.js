@@ -1,10 +1,15 @@
 //Including classes
 const config = require('./config.json')
+const emailAuth = require('./email-details.json')
 const { roles } = require('./constants');
+var favicon = require('serve-favicon');
+
+
 
 //Including External libraries
 const express = require('express') //Build web app, handle post and requests
 const flash = require('express-flash') 
+const nodemailer = require('nodemailer');
 const session = require('express-session')
 const bcrypt = require('bcrypt') //password hashing
 const passport = require('passport') //Session Authentication
@@ -18,6 +23,7 @@ if (process.env.NODE_ENV !== 'production') {
 const app = express()
 var path = require('path');
 
+// app.use(favicon(__dirname + '/public/images/favicon.ico'));
 
 //creating a connection to MySQL Database
 let connection = mysql.createConnection(config);
@@ -43,6 +49,40 @@ connection.query(sql, (error, results, fields) => {
       password: results[i].Password.toString(),
       role: results[i].Role,
       quota: results[i].Quota
+    })
+  }
+});
+
+sql = 'SELECT * FROM cost_table'
+const costs = []
+connection.query(sql, (error, results, fields) => {
+  if (error) {
+    // Displays the error (if any) on the console
+    return console.error(error.message)
+  }
+
+  for (var i = 0; i < results.length; i++) {
+    costs.push({
+      id: results[i].item_ID,
+      description: results[i].Description,
+      price: results[i].Price,
+      cost: results[i].Cost
+    })
+  }
+});
+sql = 'SELECT * FROM resources'
+const resources = []
+connection.query(sql, (error, results, fields) => {
+  if (error) {
+    // Displays the error (if any) on the console
+    return console.error(error.message)
+  }
+
+  for (var i = 0; i < results.length; i++) {
+    resources.push({
+      id: results[i].Resource_ID,
+      name: results[i].Name,
+      link: results[i].Resource_Link
     })
   }
 });
@@ -95,6 +135,7 @@ initializePassport(
 )
 
 
+
 //Configuring application to run ejs files
 app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
@@ -118,8 +159,8 @@ app.use(bodyParser.urlencoded({ extended : false }));
 app.get('/', checkAuthenticated, (req, res, next) => {
   if (req.session.passport.user.role == roles.admin){
     res.render('admin-index.ejs', {
-      delegates: delegates.filter((x) => { return x.supervisor_id == req.session.passport.user.id;}),
-      user: req.session.passport.user, Committees: committees}
+      delegates: delegates ,
+      user: req.session.passport.user, resources, Committees: committees}
       )
   } else{
       res.render('index.ejs', {
@@ -130,7 +171,19 @@ app.get('/', checkAuthenticated, (req, res, next) => {
 
 app.get('/resources', checkAuthenticated, (req, res) => {
   res.locals.user = req.session.passport.user;
-  res.render('resources.ejs', { name: req.user.name })
+  res.render('resources.ejs', { name: req.user.name, resources })
+})
+
+app.get('/finance', checkAuthenticated, (req, res) => {
+  var revenue = 0;
+  var total_cost = 0;
+  users.forEach(user => {
+    costs.forEach(cost =>{
+      revenue += user.quota * cost.price 
+      total_cost += user.quota * cost.cost 
+    })
+  })
+  res.render('finance.ejs', { user: req.session.passport.user ,costs, total: {revenue: revenue, cost: total_cost}})
 })
 
 app.get('/settings', checkAuthenticated, (req, res) => {
@@ -139,7 +192,8 @@ app.get('/settings', checkAuthenticated, (req, res) => {
 })
 
 app.get('/admin', checkAuthenticated, checkAdmin,(req, res) => {
-  res.render('manage.ejs', { message: null ,users, user: req.session.passport.user, Committees: committees})
+
+  res.render('manage.ejs', {users, user: req.session.passport.user, Committees: committees})
 })
 
 app.get('/user/:id', checkAuthenticated, checkAdmin,(req, res) => {
@@ -147,18 +201,33 @@ app.get('/user/:id', checkAuthenticated, checkAdmin,(req, res) => {
     var del_names = []
     delegates.forEach(del => 
       del_names.push(del.name));
-    res.render('delegate-table.ejs', {names: del_names, delegates: delegates.filter((x) => { return x.supervisor_id == id;}) , user: req.session.passport.user, id })    
+    res.render('delegate-table.ejs', {allDelegates: delegates.filter((x) => { return x.supervisor_id == id;}), names: del_names, delegates: delegates.filter((x) => { return x.supervisor_id == id;}) , user: req.session.passport.user, id })    
+})
+
+app.post('/user/generate-invoice', checkAuthenticated, checkAdmin,(req, res) => {
+  var id = req.body.id;
+  var index = users.findIndex(x => x.id == id)
+  res.render('invoice.ejs', {invoice: costs, user: users[index] })    
 })
 
 app.get('/delegates', checkAuthenticated, checkAdmin, (req, res) => {
   var del_names = []
   delegates.forEach(del => del_names.push(del.name));
-  res.render('delegate-table.ejs', {names: del_names, delegates: delegates , user: req.session.passport.user, users})    
+  res.render('delegate-table.ejs', {allDelegates: delegates, names: del_names, delegates: delegates , user: req.session.passport.user, users})    
 })
 
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
   res.render('login.ejs')
+})
+
+app.get('/contact', (req, res) => {
+  res.render('contact-form.ejs')
+})
+
+app.get('/generate-invoice', checkAuthenticated, (req, res) => {
+
+  res.render('invoice.ejs', {user: req.session.passport.user, invoice: costs})
 })
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
@@ -186,23 +255,100 @@ app.post('/', checkAuthenticated, (req,res)=> {
   res.redirect('/login')
 })
 
+app.post('/contact', (req,res)=> {
+  var name = req.body.name
+  var email = req.body.email
+  var school = req.body.school
+  var message = req.body.msg
+    
+  let mailTransporter = nodemailer.createTransport(emailAuth);
+
+  let mailDetails = {
+    from: emailAuth.auth.user, //noreply@server.com
+    to: email,
+    subject: 'You\'ve recieved a response from your Contact Form',
+    text: "From: "+ name + "\nSchool: "+ school + "\n\n" + message
+  };
+
+  mailTransporter.sendMail(mailDetails, function(err, data) {
+    if(err) {
+        console.error(err.message)
+    } else {
+        console.log('Email sent successfully');
+    }
+  });
+  res.redirect('/login')
+})
+
 app.post('/display-delegates', checkAuthenticated, checkAdmin, (req,res)=> {
   var del_names = req.body.delegate.split(",")
+
   var del_list = []
   del_names.forEach(name => {
     const index = delegates.findIndex(del => del.name == name);
     del_list.push(delegates[index])
   });
 
-  console.log(del_list)
-  res.render('delegate-table.ejs',{delegates: del_list , names: del_names, user: req.session.passport.user, users} )
+
+  res.render('delegate-table.ejs',{allDelegates: delegates, delegates: del_list , names: del_names, user: req.session.passport.user, users} )
 })
 
-app.post('/admin/send-invoice', checkAuthenticated, checkAdmin, (req,res)=> {
-  res.render('manage.ejs', { message: "Email was sent to Supervisor " + users[users.findIndex(user => user.id == req.body.id)].name+ "!" ,users, user: req.session.passport.user, Committees: committees} )
+app.post('/add-cost', checkAuthenticated, checkAdmin, (req,res)=> {
+  var name = req.body.name
+  var price = req.body.price
+  var cost = req.body.cost
+
+  let insertStatement = 'INSERT INTO cost_table(item_ID, Description, Cost, Price) VALUES(NULL,"'+ name +'","' + cost +'","' + price +'")'
+  connection.query(insertStatement, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+
+  let sql = "SELECT * FROM cost_table ORDER BY item_ID DESC LIMIT 1" 
+  connection.query(sql, (error, results, fields) => {
+    if (error) {
+      // Displays the error (if any) on the console
+      return console.error(error.message)
+    }
+
+    costs.push({
+      id: results[0].item_ID,
+      description: results[0].Description,
+      price: results[0].Price,
+      cost: results[0].Cost
+    })
+  });
+  res.redirect('/finance')
 })
 
-app.post('/add-committee', checkAuthenticated, (req,res)=> {
+app.post('/add-resource', checkAuthenticated, checkAdmin, (req,res)=> {
+  var name = req.body.name
+  var link = req.body.link
+
+  let insertStatement = 'INSERT INTO resources(Resource_ID, Name, Resource_Link) VALUES(NULL,"'+ name +'","' + link +'")'
+  connection.query(insertStatement, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+
+  let sql = "SELECT * FROM resources ORDER BY Resource_ID DESC LIMIT 1" 
+  connection.query(sql, (error, results, fields) => {
+    if (error) {
+      // Displays the error (if any) on the console
+      return console.error(error.message)
+    }
+    resources.push({
+      id: results[0].Resource_ID,
+      name: results[0].Name,
+      link: results[0].Resource_Link
+    })
+  });
+  res.redirect('/')
+})
+
+app.post('/add-committee', checkAuthenticated, checkAdmin, (req,res)=> {
   var name = req.body.name
   var max_delegates = req.body.max_delegates
 
@@ -212,7 +358,6 @@ app.post('/add-committee', checkAuthenticated, (req,res)=> {
       return console.error(error.message)
     }
   })
-
 
   let sql = "SELECT * FROM committees ORDER BY Committee_ID DESC LIMIT 1" 
   connection.query(sql, (error, results, fields) => {
@@ -308,14 +453,22 @@ app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
   var committee_list = req.body['SelectedCommittee[]'];
   var foundIndex = users.findIndex(user => user.id == id);
   users[foundIndex].quota = quota;
-  let sql = 'UPDATE accounts SET Quota = ' + quota + ' WHERE (ID =' + id + ');'
+  let sql = 'UPDATE accounts SET Quota = ' + quota + ' WHERE (ID =' + id + ');DELETE FROM delegates WHERE (Supervisor_ID =' + id +')'
   connection.query(sql, (error)=>{
     if(error){
       return console.error(error.message)
     }
   })
+  var filteredDelegates = delegates.filter(x => x.supervisor_id == id)
+  filteredDelegates.forEach(delegate => {
+    var index = delegates.findIndex(x => x.id == delegate.id);
+    if (index > -1) {
+      delegates.splice(index, 1); // 2nd parameter means remove one item only
+    }}
+  )
   sql = '';
   if (del_list){
+
     if (Array.isArray(del_list)){
       for( let index = 0; index < del_list.length; index++ ) {
         //parallel arrays
@@ -379,6 +532,38 @@ app.post('/admin/modify-quota', checkAuthenticated, checkAdmin, (req,res)=> {
   res.redirect('/admin')
 })
 
+app.post('/delete-cost', checkAuthenticated, checkAdmin, (req,res)=> {
+  var id = req.body.id;
+  let sql = 'DELETE FROM cost_table WHERE (item_ID =' + id + ');'
+  var index = costs.findIndex(x => x.id == id);
+  if (index > -1) {
+    costs.splice(index, 1); // 2nd parameter means remove one item only
+  } 
+
+  connection.query(sql, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  res.redirect('/finance')
+})
+
+app.post('/delete-resource', checkAuthenticated, checkAdmin, (req,res)=> {
+  var id = req.body.id;
+  let sql = 'DELETE FROM resources WHERE (Resource_ID =' + id + ');'
+  var index = resources.findIndex(x => x.id == id);
+  if (index > -1) {
+    resources.splice(index, 1); // 2nd parameter means remove one item only
+  } 
+
+  connection.query(sql, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  res.redirect('/')
+})
+
 app.post('/delete-delegate', checkAuthenticated, (req,res)=> {
   var delegate = req.body['delegate[]'];
   let sql = '';
@@ -410,10 +595,47 @@ app.post('/delete-delegate', checkAuthenticated, (req,res)=> {
   res.redirect('/')
 })
 
+app.post('/settings/modify-account', checkAuthenticated, (req,res)=> {
+  try{
+  var id = req.body.id
+  var salutation = req.body.salutation
+  var name = req.body.name
+  var sex = req.body.sex
+  var school = req.body.school
+  var nationality = req.body.nationality
+  var email = req.body.email
+
+  
+  let sql = 'UPDATE accounts SET Salutation = "' + salutation + '" WHERE (ID =' + id + ');'
+  sql += 'UPDATE accounts SET Name = "' + name + '" WHERE (ID =' + id + ');'
+  sql += 'UPDATE accounts SET Sex = "' + sex + '" WHERE (ID =' + id + ');'
+  sql += 'UPDATE accounts SET School = "' + school + '" WHERE (ID =' + id + ');'
+  sql += 'UPDATE accounts SET Nationality = "' + nationality + '" WHERE (ID =' + id + ');'
+  sql += 'UPDATE accounts SET Email = "' + email + '" WHERE (ID =' + id + ');'
+  connection.query(sql, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  var index = users.findIndex(x => x.id == id);
+  users[index].name = name
+  users[index].sex = sex
+  users[index].school = school
+  users[index].nationality = nationality
+  users[index].email = email
+
+
+  res.redirect('/')
+  } catch(e){
+    res.redirect('/settings')
+  }
+  
+})
+
 app.post('/settings/change-password', checkAuthenticated, async (req,res)=> {
   try{
   const hashedPassword = await bcrypt.hash(req.body.password, 10)
-  var id = req.session.passport.user.id
+  var id = req.body.id
   var password = req.body.password
   var confirmPassword = req.body.confirmPassword
   
