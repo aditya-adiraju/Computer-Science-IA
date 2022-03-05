@@ -120,16 +120,7 @@
     <div class="center">
         <button class="button" onclick="window.location.href = '/';">Back</button>
         <button class="button" onclick="window.print()">Print</button>
-
     </div>
-    <br>
-    <div class="center">
-        <form action="/send-invoice" method="POST" onsubmit="alert('Invoice has been sent to your email');">
-            <input type="hidden" name="id" id="id" value=<%= user.id %>> </input>
-            <button class="button" type="submit" >Email Invoice</button>
-        </form>
-    </div>
-
     <script>
         n =  new Date();
         y = n.getFullYear();

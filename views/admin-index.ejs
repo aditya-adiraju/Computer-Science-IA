@@ -80,6 +80,7 @@
 <br><br>
 
 <button class="button" onclick="openForm('')">Add Committee</button>
+<button class="button" onclick="openForm('1')">Modify Committee</button>
 <div class="loginPopup">
     <div class="formPopup" id="popupForm">
         <form action="/add-committee" method="POST">
@@ -97,6 +98,33 @@
         </form>
     </div>
 </div>
+
+<div class="loginPopup">
+  <div class="formPopup" id="popupForm1">
+      <form action="/modify-committee" method="POST">
+          <h2 style="text-align:center;">Modify Committee</h2>
+          <div class="container" style="padding-left:2%">
+            <label for="id">Select Committee: </label>
+            <select class="input" style="height:20px;" name="committee" required>
+                <% Committees.forEach(committee => { %>
+                    <option value="<%= committee.name %>"><%= committee.name %> </option>
+                <% }) %>
+            </select> 
+              <label for="name">New committee Name: </label>
+              <input class="input" type="text" id="name" name="name" required>
+              <label for="max_delegates">Maximum Delegates: </label>
+              <input class="input" type="number" id="max_delegates" name="max_delegates" required>
+          </div>
+          <br><br><br>
+          <br><br>
+          <button class="button" type="submit">MODIFY</button>
+          <button type="button" class="button" onclick="closeForm('1')">CLOSE</button>
+          <br><br>
+      </form>
+  </div>
+</div>
+
+
 
 <table class="table">
   <thead>

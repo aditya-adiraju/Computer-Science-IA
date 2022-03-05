@@ -8,6 +8,7 @@ var favicon = require('serve-favicon');
 
 //Including External libraries
 const express = require('express') //Build web app, handle post and requests
+var ejs = require("ejs");
 const flash = require('express-flash') 
 const nodemailer = require('nodemailer');
 const session = require('express-session')
@@ -16,6 +17,7 @@ const passport = require('passport') //Session Authentication
 const createHttpError = require('http-errors'); // error-handling library
 const methodOverride = require('method-override')
 const bodyParser = require('body-parser');
+var fs = require("fs");
 let mysql = require('mysql') //connecting to MYSQL database
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config() //Creates environment variables
@@ -109,6 +111,7 @@ connection.query(nsql, (error, results, fields) => {
   }
   }
 });
+
 const committees = []
 let msql = "SELECT * FROM committees";
 connection.query(msql, (error, results, fields) => {
@@ -265,9 +268,9 @@ app.post('/contact', (req,res)=> {
 
   let mailDetails = {
     from: emailAuth.auth.user, //noreply@server.com
-    to: email,
+    to: 'adadiraju@cisb.org.in',
     subject: 'You\'ve recieved a response from your Contact Form',
-    text: "From: "+ name + "\nSchool: "+ school + "\n\n" + message
+    text: "From: "+ name + "\nSchool: "+ school + "\nEmail: "+ email +"\n\n" + message
   };
 
   mailTransporter.sendMail(mailDetails, function(err, data) {
@@ -279,6 +282,38 @@ app.post('/contact', (req,res)=> {
   });
   res.redirect('/login')
 })
+
+app.post('/send-invoice', (req,res)=> {
+  var id = req.body.id;
+  console.log(id)
+  var index = users.findIndex(x => x.id == id)
+  console.log(users[index])
+  
+  let mailTransporter = nodemailer.createTransport(emailAuth);
+
+  ejs.renderFile(__dirname + "/views/invoice.ejs", {invoice: costs, user: users[index] }, function (err, data) {
+    if (err) {
+        console.log(err);
+    } else {
+        var mailOptions = {
+            from: emailAuth.auth.user,
+            to: users[index].email,
+            subject: 'Your Invoice for CISMUN VIII has been Generated',
+            html: data
+        };
+        mailTransporter.sendMail(mailOptions, function (err, info) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log('Message sent: ' + info.response);
+            }
+        });
+    }
+    
+    });
+  res.redirect('/login')
+})
+
 
 app.post('/display-delegates', checkAuthenticated, checkAdmin, (req,res)=> {
   var del_names = req.body.delegate.split(",")
@@ -373,6 +408,34 @@ app.post('/add-committee', checkAuthenticated, checkAdmin, (req,res)=> {
   });
   res.redirect('/login')
 })
+
+app.post('/modify-committee', checkAuthenticated, checkAdmin, (req,res)=> {
+  var committee = req.body.committee
+  var name = req.body.name
+  var max_delegates = req.body.max_delegates
+  var index = committees.findIndex(x => x.name == committee);
+  committees[index].name = name
+  committees[index].max_delegates = max_delegates
+
+  let insertStatement = 'UPDATE committees SET Committee = "'+ name +'" WHERE (`Committee` = "'+ committee +'" );'
+  insertStatement += 'UPDATE committees SET Max_Delegates = '+ max_delegates +' WHERE (`Committee` = "'+ committee +'" );'
+  
+  
+
+  connection.query(insertStatement, (error)=>{
+    if(error){
+      return console.error(error.message)
+    }
+  })
+  var filteredDelegates = delegates.filter(x => x.committee == committee)
+  filteredDelegates.forEach(delegate => {
+    var index = delegates.findIndex(x => x.id == delegate.id);
+    delegates[index].committee = name
+  })
+  res.redirect('/')
+
+});
+
 
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
   successRedirect: '/',
