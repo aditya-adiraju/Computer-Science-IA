@@ -90,8 +90,8 @@ connection.query(sql, (error, results, fields) => {
 });
 
 const delegates = []
-let nsql = "SELECT * FROM delegates";
-connection.query(nsql, (error, results, fields) => {
+sql = "SELECT * FROM delegates";
+connection.query(sql, (error, results, fields) => {
   if (error) {
     // Displays the error (if any) on the console
     return console.error(error.message)
@@ -113,8 +113,8 @@ connection.query(nsql, (error, results, fields) => {
 });
 
 const committees = []
-let msql = "SELECT * FROM committees";
-connection.query(msql, (error, results, fields) => {
+sql = "SELECT * FROM committees";
+connection.query(sql, (error, results, fields) => {
   if (error) {
     // Displays the error (if any) on the console
     return console.error(error.message)
@@ -140,7 +140,12 @@ initializePassport(
 
 
 //Configuring application to run ejs files
-app.set('view-engine', 'ejs')
+app.set('views', path.join(__dirname, 'views'));
+
+// Set view engine as EJS
+app.engine('html', require('ejs').renderFile);
+app.set('view engine', 'html');
+
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
 app.use(session({
@@ -149,6 +154,7 @@ app.use(session({
   saveUninitialized: false
 }))
 
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -156,6 +162,7 @@ app.use(passport.session());
 
 app.use(methodOverride('_method'))
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use(bodyParser.urlencoded({ extended : false }));
 
 //Checks whether the user is authenticated and directs to login page if they are not authenticatec
@@ -298,7 +305,7 @@ app.post('/send-invoice', (req,res)=> {
         var mailOptions = {
             from: emailAuth.auth.user,
             to: users[index].email,
-            subject: 'Your Invoice for CISMUN VIII has been Generated',
+            subject: 'Your Invoice for CISMUN has been Generated',
             html: data
         };
         mailTransporter.sendMail(mailOptions, function (err, info) {
@@ -767,14 +774,3 @@ function checkAdmin(req, res, next) {
 const PORT = process.env.PORT || 3000;
 console.log(`🚀  @  http://localhost:${PORT}`)
 app.listen(PORT)
-
-/*
-
-libraries 
-relational database and sql
-authentication module (passwords)
-Linear Search Algorithm
-Lists and tuples as data strucutres
-GUI
-Error-Handling
-*/
