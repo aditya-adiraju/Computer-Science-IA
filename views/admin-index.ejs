@@ -80,7 +80,7 @@
 <br><br>
 
 <button class="button" onclick="openForm('')">Add Committee</button>
-<button class="button" onclick="openForm('1')">Modify Committee</button>
+<button class="button" onclick="openForm('4')">Modify Committee</button>
 <div class="loginPopup">
     <div class="formPopup" id="popupForm">
         <form action="/add-committee" method="POST">
@@ -100,7 +100,7 @@
 </div>
 
 <div class="loginPopup">
-  <div class="formPopup" id="popupForm1">
+  <div class="formPopup" id="popupForm4">
       <form action="/modify-committee" method="POST">
           <h2 style="text-align:center;">Modify Committee</h2>
           <div class="container" style="padding-left:2%">
@@ -163,7 +163,7 @@
 <div class="loginPopup">
   <div class="formPopup" id="popupForm2">
     <form action="/delete-resource" method="POST">
-        <h2 style="text-align:center;">Delete Cost</h2>
+        <h2 style="text-align:center;">Delete Resource</h2>
         <div class="container" style="padding-left:2%">
             <label for="id">Select Item: </label>
             <select class="input" name="id" required>

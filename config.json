@@ -1,7 +1,7 @@
 {
     "host": "localhost",
     "user": "root",
-    "password": "abhi1234",
+    "password": "12345678",
     "database": "mundb1",
     "multipleStatements": true
   }

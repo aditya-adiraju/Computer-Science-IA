@@ -29,25 +29,25 @@ table {
         border: thin solid black
     }
 /*the container must be positioned relative:*/
-.autocomplete {
+.suggestions {
   position: relative;
   display: inline-block;
 }
 
 
-.autocomplete-items {
+.suggestions-suggestion {
   position: absolute;
   border: 1px solid #d4d4d4;
   border-bottom: none;
   border-top: none;
   z-index: 99;
-  /*position the autocomplete items to be the same width as the container:*/
+  /*position the suggestions suggestion to be the same width as the container:*/
   top: 100%;
   left: 0;
   right: 0;
 }
 
-.autocomplete-items div {
+.suggestions-suggestion div {
   padding: 10px;
   cursor: pointer;
   background-color: #fff; 
@@ -55,273 +55,177 @@ table {
 }
 
 /*when hovering an item:*/
-.autocomplete-items div:hover {
+.suggestions-suggestion div:hover {
   background-color: #e9e9e9; 
 }
 
-/*when navigating through the items using the arrow keys:*/
-.autocomplete-active {
+/*when navigating through the suggestion using the arrow keys:*/
+.suggestions-active {
   background-color: DodgerBlue !important; 
   color: #ffffff; 
 }
 </style>
 <script>
 
-  
-  class Node {
-    constructor() {
-      // CONTAINS ZERO OR MORE CHILDREN
-      this.children = {};
-      // INDICATE WHETHER THIS IS THE END OF A WORD
-      this.last = false;
+class Node {
+    constructor(){
+        this.children = {}
+        this.last = false //indicates end of word
     }
-  }
+}
 
-  class Autocomplete {
-    constructor(list) {
-      // INITIALIZE THE ROOT
-      this.root = this.buildTrie(list);
-    }
-
-    buildTrie(list) {
-      // THE ROOT OF THE TREE
-      const root = new Node();
-      
-      // FOR EACH WORD
-      for (const word of list) {
-        // ADD TO THE ROOT
-        this.insert(root, word);
-      }
-
-      return root;
-    }
-
-    /**
-     * INSERT A CHILD NODE TO THE PARENT NODE
-     **/
-    insert(parent, word) {
-      // ITERATE EACH CHARACTER IN THE WORD
-      for (const char of word) {
-        // ADD A CHILD IF IT DOES NOT EXIST
-        if (parent.children[char] === undefined) {
-          parent.children[char] = new Node();
+class TrieAutocomplete{
+    constructor(wordList){
+        const root = new Node()
+        for (const word of wordList){
+            this.insertNode(root, word)
         }
-        // SET THE CURRENT CHILD AS PARENT
-        parent = parent.children[char];
-      }
-
-      // SET TO TRUE BECAUSE THIS IS THE END OF THE WORD
-      parent.last = true;
+        this.root = root
     }
 
-    /**
-     * CHECK IF THERE IS A TRIE STARTS WITH THE INPUT
-     */
-    isStartsWith(input) {
-      let node = this.root,
-          found = true,
-          word = '';
-
-      for (const char of input) {
-        // CHECK IF THE CHARACTER EXIST
-        if (node.children[char]) {
-          node = node.children[char];
-          word += char;
-        } else if (node.children[char.toUpperCase()]) { // CASE INSENITIVE
-          node = node.children[char.toUpperCase()];
-          word += char.toUpperCase();
-        } else {
-          found = false;
-          break;
+    insertNode(node, word){
+        for(const char of word){
+          // creates node if it doesn't exist already
+            if (node.children[char] === undefined) {
+                node.children[char] = new Node()
+            }
+            node = node.children[char]
         }
-      }
-
-      // RETURNS THE CURRENT NODE AND WORD
-      return {
-        node: (found ? node : null),
-        word,
-      };
+        node.last = true;
     }
 
-  /**
-   * GET AN ARRAY OF SUGGESTIONS
-   */
-  getAutocompleteListBfs(input) {
-    // CHECK IF IT STARTS WITH INPUT
-    const { node, word } = this.isStartsWith(input);
+    beginsWith(word){
+        let node = this.root
+        let foundFlag = true
+        let result = ''
 
-    // RETURN EMPTY ARRAY IF NO MATCH
-    if (!node) {
-      return [];
-    }
+        for (const char of word){
 
-    const words = [];
-
-    // ADD TO THE RESULT IF THE CURRENT NODE ALSO THE LAST OF A WORD
-    if (node.last) {
-      words.push(word);
-    }
-
-    return words.concat(this.getWordsBreathFirstSearch(word, node));
-  }
-
-
-    /**
-     * GET ALL THE WORDS FROM THE GIVEN NODE
-     * USING BREATH FIRST SEARCH ALGORITHM
-     * @param {string} prefix
-     * @param {Node} node 
-     * @return {string[]} An array of words
-     * @time complexity: O(N) where N is the size of node
-     * @space complexity: O(N) where N is the size of node
-     */
-    getWordsBreathFirstSearch(prefix, node) {
-      const words = [];
-      const queue = [
-        { node, prefix }
-      ];
-      while (queue.length) {
-        const { node, prefix } = queue.shift();
-
-        for (const key in node.children) {
-          // IF THIS IS THE END OF THE WORD
-          if (node.children[key].last) {
-            // CONCATENATE THE PREVIOUS CHARACTERS AND THE CURRENT CHARACTER
-            // ADD IT TO THE WORDS
-            words.push(prefix + key);
+            if (node.children[char]) {
+                node = node.children[char]
+                result += char;
+            }
+            //Case-insenstive search
+            else if (node.children[char.toUpperCase()]){
+                node = node.children[char.toUpperCase()]
+                result += char.toUpperCase()
+            }
+            else{
+                foundFlag = false;
+                break;
+                //exit loop if not found
+            }
+        }
+        if (foundFlag) {
+          return{
+            node: node,
+            result
           }
-
-          // ADD TO THE QUEUE
-          queue.push({
-            node: node.children[key],
-            prefix: prefix + key,
-          });
+        } else{
+          return{
+            node: null,
+            result
+          }
         }
-      }
-      return words;
-    }
-  }
-  function submitForm(){  
-        const trie = new Autocomplete(delegates)
-        var arr = trie.getAutocompleteListBfs(document.myForm.delegate.value.trim())
-        document.myForm.delegate.value = arr.join()
-        document.myForm.submit()
     }
 
+    breadthFirstSearch(searchQuery){
+
+        const {node, result} = this.beginsWith(searchQuery)
+
+        if (!node){
+            return []
+        }
+
+        const list = []
+        // queue stores possible Trie results or traversals
+        const queue = [{node, result}]
+        const possibleWords = []
+        //if current node is a word, add to suggestion list
+        if (node.last){
+            list.push(result)
+        }
+        
+        while (queue.length){
+            const {node, result} = queue.shift()
+            // array.shift() removes and returns the element at index 0
+            // queue.shift is a dequeue operation
+            // 
+            for(const child in node.children){
+                if(node.children[child].last){
+                    possibleWords.push(result + child)
+                }
+                //queue.push() acts as enqueue operation 
+                queue.push({
+                    node: node.children[child],
+                    result: result + child
+                })
+
+            }
+        }
+        return list.concat(possibleWords)
+    }
+}
+function submitForm(){  
+    const trie = new TrieAutocomplete(delegates)
+    var arr = trie.breadthFirstSearch(document.myForm.delegate.value.trim())
+    document.myForm.delegate.value = arr.join()
+    document.myForm.submit()
+}
   //Displays Trie results with a drop down data list
-  function autocomplete(inp, list) {
-    /*the autocomplete function takes two arguments,
-    the text field element and an array of possible autocompleted values:*/
-    var currentFocus;
-    /*execute a function when someone writes in the text field:*/
-    inp.addEventListener("input", function(e) {
-        var a, b, i, val = this.value;
-        /*close any already open lists of autocompleted values*/
-        closeAllLists();
-        if (!val) { return false;}
-        currentFocus = -1;
-        /*create a DIV element that will contain the items (values):*/
-        a = document.createElement("DIV");
-        a.setAttribute("id", this.id + "autocomplete-list");
-        a.setAttribute("class", "autocomplete-items");
-        /*append the DIV element as a child of the autocomplete container:*/
-        this.parentNode.appendChild(a);
+  function autocomplete(input, list) {
 
-        console.log(list)
-        const trie = new Autocomplete(list)
-        console.log(trie);
-        var arr = trie.getAutocompleteListBfs(inp.value)
 
-      
-        console.log(arr)
-        /*for each item in the array...*/
-        for (i = 0; i < arr.length; i++) {
-          /*check if the item starts with the same letters as the text field value:*/
-          if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-            /*create a DIV element for each matching element:*/
-            b = document.createElement("DIV");
-            /*make the matching letters bold:*/
-            b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
-            b.innerHTML += arr[i].substr(val.length);
-            /*insert a input field that will hold the current array item's value:*/
-            b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-            /*execute a function when someone clicks on the item value (DIV element):*/
-            b.addEventListener("click", function(e) {
-                /*insert the value for the autocomplete text field:*/
-                inp.value = this.getElementsByTagName("input")[0].value;
-                /*close the list of autocompleted values,
-                (or any other open lists of autocompleted values:*/
-                closeAllLists();
-            });
-            a.appendChild(b);
-          }
-        }
-    });
-    /*execute a function presses a key on the keyboard:*/
-    inp.addEventListener("keydown", function(e) {
-        var x = document.getElementById(this.id + "autocomplete-list");
-        if (x) x = x.getElementsByTagName("div");
-        if (e.keyCode == 40) {
-          /*If the arrow DOWN key is pressed,
-          increase the currentFocus variable:*/
-          currentFocus++;
-          /*and and make the current item more visible:*/
-          addActive(x);
-        } else if (e.keyCode == 38) { //up
-          /*If the arrow UP key is pressed,
-          decrease the currentFocus variable:*/
-          currentFocus--;
-          /*and and make the current item more visible:*/
-          addActive(x);
-        } else if (e.keyCode == 13) {
-          /*If the ENTER key is pressed, prevent the form from being submitted,*/
-          e.preventDefault();
-          if (currentFocus > -1) {
-            /*and simulate a click on the "active" item:*/
-            if (x) x[currentFocus].click();
-          }
-        }
-    });
-    //adds items to autocomplete list
-    function addActive(x) {
-      /*a function to classify an item as "active":*/
-      if (!x) return false;
-      /*start by removing the "active" class on all items:*/
-      removeActive(x);
-      if (currentFocus >= x.length) currentFocus = 0;
-      if (currentFocus < 0) currentFocus = (x.length - 1);
-      /*add class "autocomplete-active":*/
-      x[currentFocus].classList.add("autocomplete-active");
-    }
-    //removes items from autocomplete search
-    function removeActive(x) {
-      /*a function to remove the "active" class from all autocomplete items:*/
-      for (var i = 0; i < x.length; i++) {
-        x[i].classList.remove("autocomplete-active");
+input.addEventListener("input", function(e) {
+    var outerDiv, innerDiv, i, query = this.value
+    closeList() //close previous lists 
+
+    if (!query) { return false}
+    
+    outerDiv = document.createElement("DIV")
+    outerDiv.setAttribute("id", this.id + "suggestions-list")
+    outerDiv.setAttribute("class", "suggestions-suggestion")
+    this.parentNode.appendChild(outerDiv)
+
+    const trie = new TrieAutocomplete(list)
+    var arr = trie.breadthFirstSearch(input.value)
+
+    for (var i = 0; i < arr.length; i++) {
+      //Generating individual suggestions
+      if (arr[i].substr(0, query.length).toUpperCase() == query.toUpperCase()) {
+        innerDiv = document.createElement("DIV")
+        innerDiv.innerHTML = "<b>" + arr[i].substr(0, query.length) + "</b>"
+        innerDiv.innerHTML += arr[i].substr(query.length)
+        innerDiv.innerHTML += "<input type='hidden' value='" + arr[i] + "'>"
+        innerDiv.addEventListener("click", function(e) {
+            input.value = this.getElementsByTagName("input")[0].value
+            closeList()
+        })
+        outerDiv.appendChild(innerDiv)
       }
     }
-    function closeAllLists(elmnt) {
-      /*close all autocomplete lists in the document,
-      except the one passed as an argument:*/
-      var x = document.getElementsByClassName("autocomplete-items");
+})
+
+
+function closeList(elmnt) {
+  var x = document.getElementsByClassName("suggestions-suggestion");
       for (var i = 0; i < x.length; i++) {
-        if (elmnt != x[i] && elmnt != inp) {
+        if (elmnt != x[i] && elmnt != input) {
           x[i].parentNode.removeChild(x[i]);
         }
       }
-    }
-    /*execute a function when someone clicks in the document:*/
-    document.addEventListener("click", function (e) {
-        closeAllLists(e.target);
-    });
-  }
+}
 
+document.addEventListener("click", function (e) {
+    closeList(e.target)
+})
+}
 </script>
 <body>
   <h1 style="text-align:center;" >CISMUN ONLINE DATABASE</h1>
   <h2 style="text-align:center;">Delegate List for supervisor ID </h2>
   <form id="myForm" name="myForm" method="post" action="/display-delegates" autocomplete="off"  >
-    <div class="autocomplete" style="width:300px;">
+    <div class="suggestions" style="width:300px;">
       <input id="delegate" type="text" name="delegate" placeholder="Search..." required>
       <button class="button" onclick="submitForm()">SEARCH</button>
     </div>
