@@ -27,28 +27,21 @@
 
 <script>
     var comm = "<%- stmts %>"
+]
 
-      function openForm() {
-        if(confirm('WARNING: Assigning a Quota to an account with an existing quota will DELETE all previously assigned delegates. Do you want to proceed?')){
-        document.getElementById("popupForm").style.display = "block";
+    function openForm(n) {
+        if(n== ''){        
+            if(confirm('WARNING: Assigning a Quota to an account with an existing quota will DELETE all previously assigned delegates. Do you want to proceed?')){
+                document.getElementById("popupForm").style.display = "block";
+            }}
+        else{
+            document.getElementById("popupForm"+ n).style.display = "block";
         }
     }
 
-    function closeForm() {
-        document.getElementById("popupForm").style.display = "none";
-    }
-    function openForm2() {
-        document.getElementById("popupForm2").style.display = "block";
-    }
-    function closeForm2() {
-        document.getElementById("popupForm2").style.display = "none";
-    }
-    function openForm3() {
-        document.getElementById("popupForm3").style.display = "block";
-    }
-    function closeForm3() {
-        document.getElementById("popupForm3").style.display = "none";
-    }
+  function closeForm(n) {
+    document.getElementById("popupForm" +n).style.display = "none";
+  }
     function addinputFields(){
         var number = document.getElementById("quota").value;
         var s = document.getElementsByName("delegate[]").length
@@ -142,9 +135,8 @@
 <br><br>
 
      <button class="button" onclick="openForm()" style="max-width: 100%, ">ASSIGN DELEGATES</button>
-
-    <button class="button" onclick="openForm2()" style="max-width: 100%, ">CHANGE PASSWORD</button>
-    <button class="button" onclick="openForm3()" style="max-width: 100%, ">GENERATE INVOICE</button>
+    <button class="button" onclick="openForm('2')" style="max-width: 100%, ">CHANGE PASSWORD</button>
+    <button class="button" onclick="openForm('3')" style="max-width: 100%, ">GENERATE INVOICE</button>
 
 <div class="loginPopup">
     <div class="formPopup" id="popupForm">
@@ -196,7 +188,7 @@
           <br><br>
           <br><br>
           <button class="button" type="submit">CHANGE</button>
-          <button type="button" class="button" onclick="closeForm2()">CLOSE</button>          
+          <button type="button" class="button" onclick="closeForm('2')">CLOSE</button>          
           <br><br>
           <br><br>
 
@@ -220,7 +212,7 @@
           <br><br>
           </div>
           <button class="button" type="submit">GENERATE</button>
-          <button type="button" class="button" onclick="closeForm3()">CLOSE</button>          
+          <button type="button" class="button" onclick="closeForm('3')">CLOSE</button>          
           <br><br>
       </form>
     </div>
