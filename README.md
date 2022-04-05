@@ -1,14 +1,14 @@
 # IB COMPUTER SCIENCE INTERNAL ASSESSMENT
 ## MUN CONFERENCE MANAGEMENT SYSTEM
 
-**Dependencies**
+**Dependencies:**
 1. MySQL Workbench 8.0.28^
 
-**DISCLAIMER**
+**DISCLAIMER:**
 
 In order to run the product locally, there may be the requirement to install additional softwares
 
-**To run the product locally**
+**To run the product locally:**
 1. Start a MYSQL server on the local computer with the following credentials
 
 ```
